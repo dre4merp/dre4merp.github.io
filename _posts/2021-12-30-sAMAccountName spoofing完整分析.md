@@ -6,8 +6,6 @@ tags:
     - sAMAccountName
 ---
 
-# sAMAccountName spoofing完整分析
-
 ## 背景
   
 漏洞编号为：`CVE-2021-42278` 和 `CVE-2021-42287`
