@@ -1,9 +1,19 @@
 ---
 layout: article
-title:      "sAMAccountName spoofing完整分析"
-date:       2021-12-30 12:00:00
+title: "sAMAccountName spoofing完整分析"
+mode: immersive
+header:
+  theme: dark
+article_header:
+  type: cover
+  image:
+    src: docs/assets/images/cover2.jpg
 tags:
     - sAMAccountName
+    - CVE-2021-42278
+    - CVE-2021-42287
+    - 漏洞
+
 ---
 
 ## 背景
