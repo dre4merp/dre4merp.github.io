@@ -1,7 +1,13 @@
 ---
 layout: article
 title:      "PrintNightmare"
-date:       2021-12-31 12:21:00
+mode: immersive
+header:
+  theme: dark
+article_header:
+  type: cover
+  image:
+    src: images/cover.jpg
 tags:
     - PrintNightmare
 ---
