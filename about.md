@@ -26,6 +26,4 @@ titles:
 key: page-about
 ---
 
-# 关于
-
 Thank for you read.

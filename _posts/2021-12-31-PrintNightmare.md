@@ -1,6 +1,6 @@
 ---
 layout: article
-title:      "PrintNightmare"
+title: "PrintNightmare"
 mode: immersive
 header:
   theme: dark
