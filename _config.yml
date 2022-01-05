@@ -54,7 +54,7 @@ author:
 
 ## => GitHub Repository (if the site is hosted by GitHub)
 ##############################
-repository: dre4merp/dre4merpp.github.io
+repository: dre4merp/dre4merp.github.io
 repository_tree: main
 
 
@@ -183,22 +183,12 @@ highlighter : rouge
 permalink   : date
 
 exclude:
-  - CHANGELOG.md
-  - HOW_TO_RELEASE.md
   - Gemfile
   - Gemfile.lock
-  - LICENSE
-  - README-*.md
-  - README.md
   - gulpfile.js
   - jekyll-text-theme.gemspec
   - package-lock.json
   - package.json
-  - /docs
-  - /node_modules
-  - /screenshots
-  - /test
-  - /vendor
 
 defaults:
   - scope:
@@ -222,3 +212,5 @@ plugins:
   - jekyll-paginate
   - jekyll-sitemap
   - jemoji
+  - jekyll-github-metadata
+
