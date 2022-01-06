@@ -172,7 +172,7 @@ analytics:
 
   ## Google Analytics
   google:
-    tracking_id : "3131105943" # google id for the site
+    tracking_id : 3131105943 # google id for the site
     anonymize_ip: false # Anonymize IP tracking for Analytics
 
 
