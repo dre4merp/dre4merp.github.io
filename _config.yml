@@ -189,6 +189,7 @@ exclude:
   - jekyll-text-theme.gemspec
   - package-lock.json
   - package.json
+  - /vendor
 
 defaults:
   - scope:
