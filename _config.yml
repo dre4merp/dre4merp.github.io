@@ -153,7 +153,7 @@ comments:
 #
 # for me, this line reads:
 # https://staticman-travisdownsio.herokuapp.com/v2/entry/travisdowns/travisdowns.github.io/master/comments
-staticman_url: https://dre4merp-staticman.herokuapp.com/v2/entry/dre4merp/dre4merp.github.io/test/comments
+staticman_url: https://dre4merp-staticman.herokuapp.com/v2/entry/dre4merp/dre4merp.github.io/main/comments
 
 
 
