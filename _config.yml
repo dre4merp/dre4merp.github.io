@@ -142,7 +142,7 @@ comments:
     lang        : zh-CN   
     serverURLs  : https://1dd5clyy.api.lncldglobal.com
     placeholder : # Prompt information
-    visitor     : # false (default)
+    visitor     : true # false (default)
     meta        : # "[nick, mail, link]" (default) nickname, E-mail, Personal-site
 
 ## => Pageview
