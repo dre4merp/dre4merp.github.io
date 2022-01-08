@@ -138,6 +138,9 @@ comments:
   valine:
     app_id      : 1DD5ClyYNJFSpAu58La1SpCM-MdYXbMMI # LeanCloud App id
     app_key     : nRqScdhVD5rb67KBD1k1fWNi # LeanCloud App key
+    pageSize    : 10
+    lang        : zh-CN   
+    serverURLs  : https://1dd5clyy.api.lncldglobal.com
     placeholder : # Prompt information
     visitor     : # false (default)
     meta        : # "[nick, mail, link]" (default) nickname, E-mail, Personal-site
