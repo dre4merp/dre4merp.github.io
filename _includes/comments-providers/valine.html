@@ -3,6 +3,9 @@
 
 {%- assign _VALINE_APP_ID = site.comments.valine.app_id -%}
 {%- assign _VALINE_APP_KEY = site.comments.valine.app_key -%}
+{%- assign _VALINE_LANG = site.comments.valine.lang -%}
+{%- assign _VALINE_PAGESIZE = site.comments.valine.pageSize -%}
+{%- assign _VALINE__SERVERURLS = site.comments.valine.serverURLs -%}
 {%- assign _VALINE_PLACEHOLDER = site.comments.valine.placeholder -%}
 {%- assign _VALINE_VISITOR = site.comments.valine.visitor -%}
 {%- assign _VALINE_META = site.comments.valine.meta -%}
@@ -24,6 +27,9 @@
       el: '#vcomments',
       appId:  '{{ _VALINE_APP_ID }}',
       appKey: '{{ _VALINE_APP_KEY }}',
+      pageSize: '{{ _VALINE_PAGESIZE }}',
+      lang: '{{ _VALINE_LANG }}'   ,
+      serverURLs: '{{ _VALINE__SERVERURLS }}',
       verify: true,
     };
     {%- if _VALINE_PLACEHOLDER -%}
