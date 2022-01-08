@@ -17,6 +17,10 @@ type: article
     <section class="article__sharing d-print-none">{%- include sharing.html -%}</section>
   {%- endif -%}
 
+  {%- if _comment != false -%}
+    <section class="page__comments d-print-none">{%- include comments.html -%}</section>
+  {%- endif -%}
+
   <div class="d-print-none">
     {%- include article-footer.html -%}
     {%- include article-section-navigator.html -%}
