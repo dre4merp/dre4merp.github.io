@@ -8,6 +8,7 @@ article_header:
   type: cover
   image:
     src: images/cover.jpg
+key: sAMAccountName_spoofing_analysis
 tags:
     - sAMAccountName
     - CVE-2021-42278

@@ -8,8 +8,12 @@ article_header:
   type: cover
   image:
     src: images/cover.jpg
+key: PrintNightmare_analysis
 tags:
     - PrintNightmare
+    - 漏洞
+    - CVE-2021-1675
+    - CVE-2021-34527
 ---
 
 ## 漏洞简介
