@@ -142,13 +142,13 @@ comments:
     lang        : zh-CN   
     serverURLs  : https://1dd5clyy.api.lncldglobal.com
     placeholder : # Prompt information
-    visitor     : true # false (default)
+    visitor     : # false (default)
     meta        : # "[nick, mail, link]" (default) nickname, E-mail, Personal-site
 
 ## => Pageview
 ##############################
 pageview:
-  provider: default # false (default), "leancloud", "custom"
+  provider: leancloud # false (default), "leancloud", "custom"
 
   ## Leancloud
   leancloud:
