@@ -117,7 +117,7 @@ sharing:
 ## => Comments
 ##############################
 comments:
-  provider:  # false (default), "disqus", "gitalk", "valine", "custom"
+  provider:  valine # false (default), "disqus", "gitalk", "valine", "custom"
 
   ## Disqus
   disqus:
