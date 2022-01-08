@@ -11,6 +11,4 @@ article_header:
 key: TestComment
 ---
 
-## Test Comment
-
 It's for Test Comment.
