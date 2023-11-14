@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Authors - 作者 - dre4merp&#39;s blog</title>
+        <link>http://dre4merp.github.io/authors/</link>
+        <description>Authors - 作者 - dre4merp&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>dre4merp@gmail.com (dre4merp)</managingEditor>
+            <webMaster>dre4merp@gmail.com (dre4merp)</webMaster><lastBuildDate>Tue, 14 Nov 2023 23:51:17 &#43;0800</lastBuildDate><atom:link href="http://dre4merp.github.io/authors/" rel="self" type="application/rss+xml" /><item>
+    <title>dre4merp</title>
+    <link>http://dre4merp.github.io/authors/dre4merp/</link>
+    <pubDate>Tue, 14 Nov 2023 23:51:17 &#43;0800</pubDate><author>
+        <name>dre4merp</name>
+    </author><guid>http://dre4merp.github.io/authors/dre4merp/</guid>
+    <description><![CDATA[]]></description>
+</item></channel>
+</rss>

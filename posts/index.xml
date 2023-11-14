@@ -1,0 +1,50 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>所有文章 - dre4merp&#39;s blog</title>
+        <link>http://dre4merp.github.io/posts/</link>
+        <description>所有文章 | dre4merp&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>dre4merp@gmail.com (dre4merp)</managingEditor>
+            <webMaster>dre4merp@gmail.com (dre4merp)</webMaster><lastBuildDate>Tue, 14 Nov 2023 23:51:17 &#43;0800</lastBuildDate><atom:link href="http://dre4merp.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Explorer_dump_analysis</title>
+    <link>http://dre4merp.github.io/explorer_dump_analysis/</link>
+    <pubDate>Tue, 14 Nov 2023 23:51:17 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/explorer_dump_analysis/</guid>
+    <description><![CDATA[背景最近在工作中遇到了个桌面卡死问题，需要分析 dump 查找问题原因。第一次分析 dump 查找卡死问题，特此记录下。 流程 查看 explorer因为卡死的外在表]]></description>
+</item><item>
+    <title>CVE 2022–26923漏洞复现及分析</title>
+    <link>http://dre4merp.github.io/cve-202226923%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</link>
+    <pubDate>Thu, 02 Jun 2022 23:38:03 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/cve-202226923%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</guid>
+    <description><![CDATA[漏洞信息 漏洞简述 漏洞名称：AD域权限提升漏洞 漏洞编号：CVE-2022–26923 漏洞类型：设计缺陷 漏洞影响：权限提升 CVSS评分：3.1 8.8]]></description>
+</item><item>
+    <title>Spring4Shell漏洞复现及分析</title>
+    <link>http://dre4merp.github.io/spring4shell%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</link>
+    <pubDate>Tue, 31 May 2022 23:36:00 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/spring4shell%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</guid>
+    <description><![CDATA[背景2022 年 3 月 31 日，Spring Framework for Java 中的漏洞被公开披露，现已被给予编号 CVE-2022-22965。 Spring 框架是 Java 中使用最广泛的轻量级开源]]></description>
+</item><item>
+    <title>CVE-2022-22947漏洞复现及分析</title>
+    <link>http://dre4merp.github.io/cve-2022-22947%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</link>
+    <pubDate>Thu, 07 Apr 2022 22:58:46 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/cve-2022-22947%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</guid>
+    <description><![CDATA[背景 前置知识 API网关在微服务架构中，由于一个系统由多个服务组成，客户端不再直接请求服务，而是添加了API网关的概念。客户端直接向API网关]]></description>
+</item><item>
+    <title>PrintNightmare漏洞复现及分析</title>
+    <link>http://dre4merp.github.io/printnightmare%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</link>
+    <pubDate>Fri, 31 Dec 2021 23:34:08 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/printnightmare%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/</guid>
+    <description><![CDATA[漏洞简介前段时间，微软公布了名为Windows PrintNightmare的安全漏洞，获得编号CVE-2021-34527。其与漏洞CVE-]]></description>
+</item><item>
+    <title>sAMAccountName spoofing完整分析</title>
+    <link>http://dre4merp.github.io/samaccountname-spoofing%E5%AE%8C%E6%95%B4%E5%88%86%E6%9E%90/</link>
+    <pubDate>Thu, 30 Dec 2021 23:21:55 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/samaccountname-spoofing%E5%AE%8C%E6%95%B4%E5%88%86%E6%9E%90/</guid>
+    <description><![CDATA[背景漏洞编号为：CVE-2021-42278 和 CVE-2021-42287 CVE-2021-42278：通常情况下，机器账户应以$结尾，即DC$。 但是AD域并没有对其]]></description>
+</item><item>
+    <title>Kerberos学习笔记</title>
+    <link>http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+    <pubDate>Thu, 30 Dec 2021 23:21:54 &#43;0800</pubDate><author>
+                        <name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
+    <description><![CDATA[基本知识 Kerberos基本概念Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话]]></description>
+</item></channel>
+</rss>
