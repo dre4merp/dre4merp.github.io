@@ -129,20 +129,59 @@
     <div id="search-dropdown-mobile"></div>
 </div>
 <main class="main">
-            <div class="container"><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "false")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">PrintNightmare漏洞复现及分析</h1><div class="post-meta">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#漏洞简介">漏洞简介</a></li>
+    <li><a href="#漏洞分析">漏洞分析</a>
+      <ul>
+        <li><a href="#漏洞点分析">漏洞点分析</a></li>
+        <li><a href="#漏洞具体分析">漏洞具体分析</a>
+          <ul>
+            <li><a href="#越过权限校验">越过权限校验</a></li>
+            <li><a href="#检查驱动签名">检查驱动签名</a></li>
+            <li><a href="#建立驱动文件列表">建立驱动文件列表</a></li>
+            <li><a href="#检查驱动兼容性">检查驱动兼容性</a></li>
+            <li><a href="#拷贝驱动文件">拷贝驱动文件</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#漏洞利用条件">漏洞利用条件</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">PrintNightmare漏洞复现及分析</h1><div class="post-meta">
             <div class="post-meta-line">
                 <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
                 </span></div>
             <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-12-31">2021-12-31</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-12-31">2021-12-31</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1855 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;</div>
-        </div><div class="content" id="content"><div class="details admonition warning open">
-                <div class="details-summary admonition-title">
-                    <i class="icon fas fa-exclamation-triangle fa-fwwarning"></i>警告<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
                 </div>
-                <div class="details-content">
-                    <div class="admonition-content">
-                        本文最后更新于 <span class="timeago" datetime="2021-12-31T23:34:08" title="December 31, 2021">2021-12-31</span>，文中内容可能已过时。</div>
-                </div>
-            </div><h2 id="漏洞简介" class="headerLink">
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#漏洞简介">漏洞简介</a></li>
+    <li><a href="#漏洞分析">漏洞分析</a>
+      <ul>
+        <li><a href="#漏洞点分析">漏洞点分析</a></li>
+        <li><a href="#漏洞具体分析">漏洞具体分析</a>
+          <ul>
+            <li><a href="#越过权限校验">越过权限校验</a></li>
+            <li><a href="#检查驱动签名">检查驱动签名</a></li>
+            <li><a href="#建立驱动文件列表">建立驱动文件列表</a></li>
+            <li><a href="#检查驱动兼容性">检查驱动兼容性</a></li>
+            <li><a href="#拷贝驱动文件">拷贝驱动文件</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#漏洞利用条件">漏洞利用条件</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="漏洞简介" class="headerLink">
     <a href="#%e6%bc%8f%e6%b4%9e%e7%ae%80%e4%bb%8b" class="header-mark"></a>漏洞简介</h2><p>前段时间，微软公布了名为<code>Windows PrintNightmare</code>的安全漏洞，获得编号<code>CVE-2021-34527</code>。其与漏洞<code>CVE-2021-1675</code>极其相似，都是通过加载DLL的方式实现代码执行。未经身份验证的远程攻击者可利用该漏洞以SYSTEM权限在域控制器上执行任意代码，从而获得整个域的控制权。微软对于该漏洞的修补工作并没有一步到位，在第一次漏洞爆出并发布修补程序后，仍可以通过其他方式绕过补丁继续利用该漏洞，微软不得不二次进行修补才成功杜绝该漏洞所带来的安全问题。</p>
 <p>影响范围：Windows Server 2008-Windows Server 2019</p>
 <h2 id="漏洞分析" class="headerLink">

@@ -129,20 +129,53 @@
     <div id="search-dropdown-mobile"></div>
 </div>
 <main class="main">
-            <div class="container"><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "false")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">sAMAccountName spoofing完整分析</h1><div class="post-meta">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#环境配置">环境配置</a></li>
+    <li><a href="#详细分析">详细分析</a>
+      <ul>
+        <li><a href="#active-directory-目录树">Active Directory 目录树</a></li>
+        <li><a href="#攻击准备工作">攻击准备工作</a></li>
+        <li><a href="#申请tgt">申请TGT</a></li>
+        <li><a href="#还原机器账户名">还原机器账户名</a></li>
+        <li><a href="#申请st">申请ST</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">sAMAccountName spoofing完整分析</h1><div class="post-meta">
             <div class="post-meta-line">
                 <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
                 </span></div>
             <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6216 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 13 分钟&nbsp;</div>
-        </div><div class="content" id="content"><div class="details admonition warning open">
-                <div class="details-summary admonition-title">
-                    <i class="icon fas fa-exclamation-triangle fa-fwwarning"></i>警告<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
                 </div>
-                <div class="details-content">
-                    <div class="admonition-content">
-                        本文最后更新于 <span class="timeago" datetime="2021-12-30T23:21:55" title="December 30, 2021">2021-12-30</span>，文中内容可能已过时。</div>
-                </div>
-            </div><h2 id="背景" class="headerLink">
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#环境配置">环境配置</a></li>
+    <li><a href="#详细分析">详细分析</a>
+      <ul>
+        <li><a href="#active-directory-目录树">Active Directory 目录树</a></li>
+        <li><a href="#攻击准备工作">攻击准备工作</a></li>
+        <li><a href="#申请tgt">申请TGT</a></li>
+        <li><a href="#还原机器账户名">还原机器账户名</a></li>
+        <li><a href="#申请st">申请ST</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="背景" class="headerLink">
     <a href="#%e8%83%8c%e6%99%af" class="header-mark"></a>背景</h2><p>漏洞编号为：<code>CVE-2021-42278</code> 和 <code>CVE-2021-42287</code></p>
 <p>CVE-2021-42278：通常情况下，机器账户应以$结尾，即<code>DC$</code>。
 但是AD域并没有对其进行强校验。通过建立与域控同名却不以$结尾的机器账户，即<code>DC</code>，对域控进行欺骗。</p>

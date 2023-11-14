@@ -129,20 +129,97 @@
     <div id="search-dropdown-mobile"></div>
 </div>
 <main class="main">
-            <div class="container"><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "false")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Kerberos学习笔记</h1><div class="post-meta">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#基本知识">基本知识</a>
+      <ul>
+        <li><a href="#kerberos基本概念">Kerberos基本概念</a></li>
+        <li><a href="#kerberos基本流程">Kerberos基本流程</a></li>
+        <li><a href="#kerberos委派">Kerberos委派</a></li>
+      </ul>
+    </li>
+    <li><a href="#调试分析基本流程">调试分析基本流程</a>
+      <ul>
+        <li><a href="#as_req">AS_REQ</a></li>
+        <li><a href="#as_rep">AS_REP</a></li>
+        <li><a href="#tgs_req">TGS_REQ</a></li>
+        <li><a href="#tgs_rep">TGS_REP</a></li>
+        <li><a href="#ap_req--as_rep">AP_REQ &amp; AS_REP</a></li>
+      </ul>
+    </li>
+    <li><a href="#委派分析">委派分析</a>
+      <ul>
+        <li><a href="#非约束委派">非约束委派</a>
+          <ul>
+            <li><a href="#基本流程">基本流程</a></li>
+            <li><a href="#配置">配置</a></li>
+            <li><a href="#调试分析">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#约束委派">约束委派</a>
+          <ul>
+            <li><a href="#基本流程-1">基本流程</a></li>
+            <li><a href="#配置-1">配置</a></li>
+            <li><a href="#调试分析-1">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#基于资源的约束委派">基于资源的约束委派</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Kerberos学习笔记</h1><div class="post-meta">
             <div class="post-meta-line">
                 <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
                 </span></div>
             <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 7286 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 15 分钟&nbsp;</div>
-        </div><div class="content" id="content"><div class="details admonition warning open">
-                <div class="details-summary admonition-title">
-                    <i class="icon fas fa-exclamation-triangle fa-fwwarning"></i>警告<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
                 </div>
-                <div class="details-content">
-                    <div class="admonition-content">
-                        本文最后更新于 <span class="timeago" datetime="2021-12-30T23:21:54" title="December 30, 2021">2021-12-30</span>，文中内容可能已过时。</div>
-                </div>
-            </div><h2 id="基本知识" class="headerLink">
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#基本知识">基本知识</a>
+      <ul>
+        <li><a href="#kerberos基本概念">Kerberos基本概念</a></li>
+        <li><a href="#kerberos基本流程">Kerberos基本流程</a></li>
+        <li><a href="#kerberos委派">Kerberos委派</a></li>
+      </ul>
+    </li>
+    <li><a href="#调试分析基本流程">调试分析基本流程</a>
+      <ul>
+        <li><a href="#as_req">AS_REQ</a></li>
+        <li><a href="#as_rep">AS_REP</a></li>
+        <li><a href="#tgs_req">TGS_REQ</a></li>
+        <li><a href="#tgs_rep">TGS_REP</a></li>
+        <li><a href="#ap_req--as_rep">AP_REQ &amp; AS_REP</a></li>
+      </ul>
+    </li>
+    <li><a href="#委派分析">委派分析</a>
+      <ul>
+        <li><a href="#非约束委派">非约束委派</a>
+          <ul>
+            <li><a href="#基本流程">基本流程</a></li>
+            <li><a href="#配置">配置</a></li>
+            <li><a href="#调试分析">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#约束委派">约束委派</a>
+          <ul>
+            <li><a href="#基本流程-1">基本流程</a></li>
+            <li><a href="#配置-1">配置</a></li>
+            <li><a href="#调试分析-1">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#基于资源的约束委派">基于资源的约束委派</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="基本知识" class="headerLink">
     <a href="#%e5%9f%ba%e6%9c%ac%e7%9f%a5%e8%af%86" class="header-mark"></a>基本知识</h2><h3 id="kerberos基本概念" class="headerLink">
     <a href="#kerberos%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" class="header-mark"></a>Kerberos基本概念</h3><p>Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话中Kerberos是守护地狱之门的一条三头神犬，而这三个头分别代表着协议的三个角色，如下图所示它们分别是：</p>
 <p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png" title="KDC架构" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC架构.png">

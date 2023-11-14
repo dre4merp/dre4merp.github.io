@@ -129,20 +129,97 @@
     <div id="search-dropdown-mobile"></div>
 </div>
 <main class="main">
-            <div class="container"><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "false")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Spring4Shell漏洞复现及分析</h1><div class="post-meta">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#前置知识">前置知识</a>
+      <ul>
+        <li><a href="#javabean">JavaBean</a></li>
+        <li><a href="#javabean-内省">JavaBean 内省</a>
+          <ul>
+            <li><a href="#基本概念">基本概念</a></li>
+            <li><a href="#和反射的区别">和反射的区别</a></li>
+            <li><a href="#源码分析详解">源码分析详解</a>
+              <ul>
+                <li><a href="#propertydescriptor">PropertyDescriptor</a></li>
+                <li><a href="#beaninfo">BeanInfo</a></li>
+                <li><a href="#introspector">IntroSpector</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#spring-cachedintrospectionresults">Spring CachedIntrospectionResults</a></li>
+        <li><a href="#spring-参数绑定">spring 参数绑定</a></li>
+      </ul>
+    </li>
+    <li><a href="#漏洞分析">漏洞分析</a>
+      <ul>
+        <li><a href="#漏洞点分析">漏洞点分析</a></li>
+        <li><a href="#利用分析">利用分析</a></li>
+        <li><a href="#利用条件">利用条件</a></li>
+      </ul>
+    </li>
+    <li><a href="#漏洞防护">漏洞防护</a>
+      <ul>
+        <li><a href="#官方修复建议">官方修复建议</a></li>
+        <li><a href="#临时防护方案">临时防护方案</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Spring4Shell漏洞复现及分析</h1><div class="post-meta">
             <div class="post-meta-line">
                 <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
                 </span></div>
             <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-05-31">2022-05-31</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2022-05-31">2022-05-31</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3816 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;</div>
-        </div><div class="content" id="content"><div class="details admonition warning open">
-                <div class="details-summary admonition-title">
-                    <i class="icon fas fa-exclamation-triangle fa-fwwarning"></i>警告<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
                 </div>
-                <div class="details-content">
-                    <div class="admonition-content">
-                        本文最后更新于 <span class="timeago" datetime="2022-05-31T23:36:00" title="May 31, 2022">2022-05-31</span>，文中内容可能已过时。</div>
-                </div>
-            </div><h2 id="背景" class="headerLink">
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#前置知识">前置知识</a>
+      <ul>
+        <li><a href="#javabean">JavaBean</a></li>
+        <li><a href="#javabean-内省">JavaBean 内省</a>
+          <ul>
+            <li><a href="#基本概念">基本概念</a></li>
+            <li><a href="#和反射的区别">和反射的区别</a></li>
+            <li><a href="#源码分析详解">源码分析详解</a>
+              <ul>
+                <li><a href="#propertydescriptor">PropertyDescriptor</a></li>
+                <li><a href="#beaninfo">BeanInfo</a></li>
+                <li><a href="#introspector">IntroSpector</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#spring-cachedintrospectionresults">Spring CachedIntrospectionResults</a></li>
+        <li><a href="#spring-参数绑定">spring 参数绑定</a></li>
+      </ul>
+    </li>
+    <li><a href="#漏洞分析">漏洞分析</a>
+      <ul>
+        <li><a href="#漏洞点分析">漏洞点分析</a></li>
+        <li><a href="#利用分析">利用分析</a></li>
+        <li><a href="#利用条件">利用条件</a></li>
+      </ul>
+    </li>
+    <li><a href="#漏洞防护">漏洞防护</a>
+      <ul>
+        <li><a href="#官方修复建议">官方修复建议</a></li>
+        <li><a href="#临时防护方案">临时防护方案</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="背景" class="headerLink">
     <a href="#%e8%83%8c%e6%99%af" class="header-mark"></a>背景</h2><p>2022 年 3 月 31 日，Spring Framework for Java 中的漏洞被公开披露，现已被给予编号 CVE-2022-22965。</p>
 <p>Spring 框架是 Java 中使用最广泛的轻量级开源框架。在 Java Development Kit (JDK) 9.0 或更高版本中，远程攻击者可以通过框架的参数绑定特性获取 AccessLogValve 对象，并使用恶意字段值触发管道机制，并在某些条件下写入任意路径的文件。该漏洞现已被修补。</p>
 <p>spring 官方公告：
