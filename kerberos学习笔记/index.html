@@ -1,0 +1,1302 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Kerberos学习笔记 - dre4merp&#39;s blog</title><meta name="Description" content="This is dre4merp&#39;s blog."><meta property="og:title" content="Kerberos学习笔记" />
+<meta property="og:description" content="基本知识 Kerberos基本概念Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" /><meta property="og:image" content="http://dre4merp.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-30T23:21:54+08:00" />
+<meta property="article:modified_time" content="2021-12-30T23:21:54+08:00" /><meta property="og:site_name" content="dre4merp&#39;s blog" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://dre4merp.github.io/logo.png"/>
+
+<meta name="twitter:title" content="Kerberos学习笔记"/>
+<meta name="twitter:description" content="基本知识 Kerberos基本概念Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话"/>
+<meta name="application-name" content="DoIt">
+<meta name="apple-mobile-web-app-title" content="DoIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" /><link rel="next" href="http://dre4merp.github.io/samaccountname-spoofing%E5%AE%8C%E6%95%B4%E5%88%86%E6%9E%90/" />
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Kerberos学习笔记",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/dre4merp.github.io\/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0\/"
+        },"genre": "posts","wordcount":  7286 ,
+        "url": "http:\/\/dre4merp.github.io\/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0\/","datePublished": "2021-12-30T23:21:54+08:00","dateModified": "2021-12-30T23:21:54+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"authors": [{
+                        "@type": "Person",
+                        "name": "dre4merp"                    
+                    }],"description": ""
+    }
+    </script></head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme;   window.isDark = window.theme !== 'light' }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('dark' === 'light' || 'dark' === 'dark' || 'dark' === 'black') setTheme('dark'), saveTheme('dark'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+        window.switchThemeEventSet = new Set()
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="dre4merp&#39;s blog">dre4merp&#39;s blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 归档 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/about/"> 关于我 </a><a class="menu-item" href="/index.xml"> 订阅 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-select" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                    <select class="color-theme-select" id="theme-select-desktop" title="切换主题">
+                        <option value="light">浅色</option>
+                        <option value="dark">深色</option>
+                        <option value="black">黑色</option>
+                        <option value="auto">跟随系统</option>
+                    </select>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="dre4merp&#39;s blog">dre4merp&#39;s blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">归档</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/about/" title="">关于我</a><a class="menu-item" href="/index.xml" title="">订阅</a><a href="javascript:void(0);" class="menu-item theme-select" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+                <select class="color-theme-select" id="theme-select-mobile" title="切换主题">
+                    <option value="light">浅色</option>
+                    <option value="dark">深色</option>
+                    <option value="black">黑色</option>
+                    <option value="auto">跟随系统</option>
+                </select>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#基本知识">基本知识</a>
+      <ul>
+        <li><a href="#kerberos基本概念">Kerberos基本概念</a></li>
+        <li><a href="#kerberos基本流程">Kerberos基本流程</a></li>
+        <li><a href="#kerberos委派">Kerberos委派</a></li>
+      </ul>
+    </li>
+    <li><a href="#调试分析基本流程">调试分析基本流程</a>
+      <ul>
+        <li><a href="#as_req">AS_REQ</a></li>
+        <li><a href="#as_rep">AS_REP</a></li>
+        <li><a href="#tgs_req">TGS_REQ</a></li>
+        <li><a href="#tgs_rep">TGS_REP</a></li>
+        <li><a href="#ap_req--as_rep">AP_REQ &amp; AS_REP</a></li>
+      </ul>
+    </li>
+    <li><a href="#委派分析">委派分析</a>
+      <ul>
+        <li><a href="#非约束委派">非约束委派</a>
+          <ul>
+            <li><a href="#基本流程">基本流程</a></li>
+            <li><a href="#配置">配置</a></li>
+            <li><a href="#调试分析">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#约束委派">约束委派</a>
+          <ul>
+            <li><a href="#基本流程-1">基本流程</a></li>
+            <li><a href="#配置-1">配置</a></li>
+            <li><a href="#调试分析-1">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#基于资源的约束委派">基于资源的约束委派</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Kerberos学习笔记</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-12-30">2021-12-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 7286 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 15 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#基本知识">基本知识</a>
+      <ul>
+        <li><a href="#kerberos基本概念">Kerberos基本概念</a></li>
+        <li><a href="#kerberos基本流程">Kerberos基本流程</a></li>
+        <li><a href="#kerberos委派">Kerberos委派</a></li>
+      </ul>
+    </li>
+    <li><a href="#调试分析基本流程">调试分析基本流程</a>
+      <ul>
+        <li><a href="#as_req">AS_REQ</a></li>
+        <li><a href="#as_rep">AS_REP</a></li>
+        <li><a href="#tgs_req">TGS_REQ</a></li>
+        <li><a href="#tgs_rep">TGS_REP</a></li>
+        <li><a href="#ap_req--as_rep">AP_REQ &amp; AS_REP</a></li>
+      </ul>
+    </li>
+    <li><a href="#委派分析">委派分析</a>
+      <ul>
+        <li><a href="#非约束委派">非约束委派</a>
+          <ul>
+            <li><a href="#基本流程">基本流程</a></li>
+            <li><a href="#配置">配置</a></li>
+            <li><a href="#调试分析">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#约束委派">约束委派</a>
+          <ul>
+            <li><a href="#基本流程-1">基本流程</a></li>
+            <li><a href="#配置-1">配置</a></li>
+            <li><a href="#调试分析-1">调试分析</a></li>
+          </ul>
+        </li>
+        <li><a href="#基于资源的约束委派">基于资源的约束委派</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="基本知识" class="headerLink">
+    <a href="#%e5%9f%ba%e6%9c%ac%e7%9f%a5%e8%af%86" class="header-mark"></a>基本知识</h2><h3 id="kerberos基本概念" class="headerLink">
+    <a href="#kerberos%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" class="header-mark"></a>Kerberos基本概念</h3><p>Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话中Kerberos是守护地狱之门的一条三头神犬，而这三个头分别代表着协议的三个角色，如下图所示它们分别是：</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png" title="KDC架构" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC架构.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/KDC%e6%9e%b6%e6%9e%84.png 2x"
+            sizes="auto"
+            alt="KDC架构">
+    </a></figure></p>
+<ol>
+<li>访问服务的Client</li>
+<li>提供服务的Server</li>
+<li>KDC，密钥分发中心，该中心里又包含以下两个服务：
+<ul>
+<li>AS，身份验证服务</li>
+<li>TGS，票据授权服务</li>
+</ul>
+</li>
+</ol>
+<p>在Windows域中通常由DC扮演其中的KDC进行所有票据的发放。DC中会默认创建一个Krbtgt账户，对应着Kerberos的认证服务。</p>
+<h3 id="kerberos基本流程" class="headerLink">
+    <a href="#kerberos%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b" class="header-mark"></a>Kerberos基本流程</h3><p>Kerberos认证主要通过三个子协议来完成，它们分别为：</p>
+<ul>
+<li>Authentication Service Exchange，身份认证服务交换，是Client与AS之间交互，包含KRB_AS_REQ和KRB_AS_REP两个包。</li>
+<li>Ticket-Granting Service (TGS) Exchange，票据授权服务交换，是Client与TGS之间交互，包含KRB_TGS_REQ和KRB_TGS_REP两个包。</li>
+<li>Client/Server Authentication Exchange，客户端/服务认证交换，是Client与Server之间交互，包含KRB_AP_REQ和KRB_AP_REP两个包。</li>
+</ul>
+<p>具体流程如下图所示：</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos%e6%b5%81%e7%a8%8b%e5%9b%be.png" title="Kerberos流程图" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos流程图.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos%e6%b5%81%e7%a8%8b%e5%9b%be.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos%e6%b5%81%e7%a8%8b%e5%9b%be.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos%e6%b5%81%e7%a8%8b%e5%9b%be.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Kerberos%e6%b5%81%e7%a8%8b%e5%9b%be.png 2x"
+            sizes="auto"
+            alt="Kerberos流程图">
+    </a></figure></p>
+<ol>
+<li><strong>AS_REQ</strong>: Client向KDC发起AS_REQ,请求凭据是Client hash加密的时间戳</li>
+<li><strong>AS_REP</strong>: KDC使用Client hash进行解密，如果结果正确就返回用krbtgt hash加密的TGT票据，TGT里面包含PAC,PAC包含Client的sid，Client所在的组。</li>
+<li><strong>TGS_REQ</strong>: Client凭借TGT票据向KDC发起针对特定服务的TGS_REQ请求</li>
+<li><strong>TGS_REP</strong>: KDC使用krbtgt hash进行解密，如果结果正确，就返回用服务hash 加密的TGS票据(这一步不管用户有没有访问服务的权限，只要TGT正确，就返回TGS票据)</li>
+<li><strong>AP_REQ</strong>: Client拿着TGS票据去请求服务</li>
+<li><strong>AP_REP</strong>: 服务使用自己的hash解密TGS票据。如果解密正确，就拿着PAC去KDC那边问Client有没有访问权限，域控解密PAC。获取Client的sid，以及所在的组，再根据该服务的ACL，判断Client是否有访问服务的权限。</li>
+</ol>
+<h3 id="kerberos委派" class="headerLink">
+    <a href="#kerberos%e5%a7%94%e6%b4%be" class="header-mark"></a>Kerberos委派</h3><p>委派（Delegation）是kerberos相对于NTLM认证独有的特性，指的是A可以让B“代理”自己去访问C服务，说是代理，也可以理解为“假冒”。</p>
+<p>具体为：域中A使用Kerberos身份验证访问域中的服务B，而B再利用A的身份去请求域中的服务C，因为用的是A的身份，所以只有A有权限访问C的时候，委派才能成功。
+委派存在三种形式：</p>
+<ul>
+<li>非约束委派</li>
+<li>约束委派</li>
+<li>基于资源的约束委派</li>
+</ul>
+<h2 id="调试分析基本流程" class="headerLink">
+    <a href="#%e8%b0%83%e8%af%95%e5%88%86%e6%9e%90%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b" class="header-mark"></a>调试分析基本流程</h2><p>DC：Windows Server 2003 调试版  IP：192.168.45.10
+Client1：Windows Server 2003 调试版  IP：192.168.45.11
+Client2：Windows 7  IP：192.168.45.15
+<strong>以下调试信息并非全部在同一次认证过程中截取</strong></p>
+<h3 id="as_req" class="headerLink">
+    <a href="#as_req" class="header-mark"></a>AS_REQ</h3><p>当Clinet1用密码进行交互登陆时，其会向AS（由域控扮演）发送<code>AS_REQ</code>
+AS_REQ: Client向KDC发起AS_REQ,请求凭据是Client hash加密的时间戳，请求TGT票据</p>
+<p>调用堆栈如下：</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo1.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>其中的<code>Logon Session</code>中存在当前账户的<code>NTLMHash</code>，之后便是用这个Hash去加密时间戳</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo2.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>对KDC请求的服务名称为<code>krbtgt</code></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo3.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>之后会在<code>KerbBuildPreAuthData</code>中生成<code>PreAuthData</code>的认证消息，其中便包括使用用户Hash加密的时间戳</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo4.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">KerbErr</span> <span class="o">=</span> <span class="n">KerbEncryptDataEx</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="o">&amp;</span><span class="n">EncryptedData</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">EncryptedTimeSize</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">EncryptedTime</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">KERB_NO_KEY_VERSION</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">KERB_ENC_TIMESTAMP_SALT</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UserKey</span>
+</span></span><span class="line"><span class="cl">            <span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>该函数实现了加密过程，其中
+<code>EncryptedTime</code>为打包后的时间戳
+<code>UserKey</code>为用户Hash
+<code>EncryptedData.cipher_text</code>为加密后的数据</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo5.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>图中标记分别为用户Hash和加密后的时间戳
+最后便是将认证包打包发送</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo6.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo7.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>通过Wireshark抓包查看padata与分析一致</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo8.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<h3 id="as_rep" class="headerLink">
+    <a href="#as_rep" class="header-mark"></a>AS_REP</h3><p><strong>AS_REP</strong>: KDC使用Client hash进行解密，如果结果正确就返回用krbtgt hash加密的TGT票据，TGT里面包含PAC,PAC包含Client的sid，Client所在的组。</p>
+<p>KDC会在KdcCheckPreAuthData函数中对所接收到的数据包进行检查。在
+KdcVerifyEncryptedTimeStamp中使用用户Hash对PreAuthData进行解密，查看是否正确，时间偏差是否在信任范围内</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">KerbErr</span> <span class="o">=</span> <span class="n">KdcVerifyEncryptedTimeStamp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ListElement</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ClientTicketInfo</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">RequestBody</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UserHandle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="o">&amp;</span><span class="n">OutputElement</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UsedOldPassword</span>
+</span></span><span class="line"><span class="cl">            <span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo9.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo10.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>之后会通过PacOptions确定是否需要建立PAC</p>
+<p>通过BuildTicketAS函数生成返回的AS_REP内容，
+其中的encrypted_part. cipher_text为TGT，此时还未加密可以导出明文
+其中key为Client与KDC通信所需要的Logon Session Key
+authorization_data为PAC，会在下一步生成并填入其中</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo11.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>之后会根据之前保存的标志确定是否构建PAC，会在KdcGetPacAuthData中构建PAC并对其进行签名后加入到上方TGT中的authorization_data中</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo12.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo13.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>其实质上应该是<code>_KERB_VALIDATION_INFO</code>结构体，其中包括了登陆用户的一些信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"> <span class="k">typedef</span> <span class="k">struct</span> <span class="nc">_KERB_VALIDATION_INFO</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">LogonTime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">LogoffTime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">KickOffTime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">PasswordLastSet</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">PasswordCanChange</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">PasswordMustChange</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">EffectiveName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">FullName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">LogonScript</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">ProfilePath</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">HomeDirectory</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">HomeDirectoryDrive</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">USHORT</span> <span class="n">LogonCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">USHORT</span> <span class="n">BadPasswordCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">UserId</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">PrimaryGroupId</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">GroupCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">[</span><span class="n">size_is</span><span class="p">(</span><span class="n">GroupCount</span><span class="p">)]</span> <span class="n">PGROUP_MEMBERSHIP</span> <span class="n">GroupIds</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">UserFlags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">USER_SESSION_KEY</span> <span class="n">UserSessionKey</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">LogonServer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">RPC_UNICODE_STRING</span> <span class="n">LogonDomainName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">PISID</span> <span class="n">LogonDomainId</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">Reserved1</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">UserAccountControl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">SubAuthStatus</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">LastSuccessfulILogon</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">FILETIME</span> <span class="n">LastFailedILogon</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">FailedILogonCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">Reserved3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">SidCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">[</span><span class="n">size_is</span><span class="p">(</span><span class="n">SidCount</span><span class="p">)]</span> <span class="n">PKERB_SID_AND_ATTRIBUTES</span> <span class="n">ExtraSids</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">PISID</span> <span class="n">ResourceGroupDomainSid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ULONG</span> <span class="n">ResourceGroupCount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">[</span><span class="n">size_is</span><span class="p">(</span><span class="n">ResourceGroupCount</span><span class="p">)]</span> <span class="n">PGROUP_MEMBERSHIP</span> <span class="n">ResourceGroupIds</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> <span class="p">}</span> <span class="n">KERB_VALIDATION_INFO</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建Reply消息，ReplyBody中包含最重要的就是Logon Session Key,该结构会使用Client Hash加密；明文TGT使用krbtgt hash进行加密<br>
+加密后的ReplyBody</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo14.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo15.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>加密后的TGT</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo16.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo17.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<h3 id="tgs_req" class="headerLink">
+    <a href="#tgs_req" class="header-mark"></a>TGS_REQ</h3><p><strong>TGS_REQ</strong>: Client凭借TGT票据向KDC发起针对特定服务的TGS_REQ请求
+<strong>AP_REQ</strong>: Client拿着TGS票据去请求服务</p>
+<p>Windows将这两步融合在了一起，具体信息可以Wireshark抓包查看</p>
+<p>Client会在KerbMakeKdcCall中接收到KDC返回的AS_REP消息</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo18.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>解包后内容，其中ticket就是加密后的TGT，encrypted_part为加密后的ReplyBody</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo19.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>使用ClientKey对ReplyBody进行解密，获得Logon Session Key</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo20.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo21.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>TGT由于是被Krbtgt hash加密的，并不能解密获得明文，而是使用它来认证自身的身份。其会被保存在本地，通过KerbCreateTicketCacheEntry建立一个新的TicketCacheEntry进行保存</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo22.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo23.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>至此认证过程完全完成，下一步将向KDC请求ST（Service Ticket）</p>
+<p>为了体现更加通用的场景，以下的Kerberos认证过程触发方式不再是用户登陆
+Client1向KDC请求某一个共享文件夹的访问权限
+命令：<code>dir \\KDCComputerName\C$</code></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo24.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>Client会在KerbGetServiceTicket中向KDC发起申请ST的TGS请求</p>
+<p>首先会通过KerbGetTgtForService进行身份认证，即上述两次通信过程，获得的TGT储存在第7参数TicketGrantingTicket中</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo25.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo26.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo27.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo28.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>之后使用KerbGetTgsTicket这个函数，通过TGT申请TGS</p>
+<p>创建RequestBody，其中主要信息为我们所申请的服务名称</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo29.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>由于我们要证明自己确实是向KDC申请TGT的机器，所以必须将该结构使用只有KDC与自己两个人知道的Key进行签名，即是用Logon Session Key进行签名
+所以便会调用KerbComputeTgsChecksum进行签名</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo30.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>Windows上的TgsRequest的TGT和身份认证部分都由Aprequest结果保存</p>
+<p>通过KerbCreateApRequest创建ApRequest
+通过KerbCreateAuthenticator创建Authenticator
+将上面的checksum放入该结构体中，之后使用Logon Session Key进行加密</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo31.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p>至此ApRequest创建完成，其中包含
+Krbtgt Hash 加密的TGT
+Logon Session 加密的 Authenticator
+最后在kerberos!KerbMakeSocketCall中发送</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo32.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo33.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo34.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png" title="kerberos-debuginfo1" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo35.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo1">
+    </a></figure></p>
+<h3 id="tgs_rep" class="headerLink">
+    <a href="#tgs_rep" class="header-mark"></a>TGS_REP</h3><p><strong>TGS_REP</strong>: KDC使用krbtgt hash进行解密，如果结果正确，就返回用服务hash 加密的TGS票据(这一步不管用户有没有访问服务的权限，只要TGT正确，就返回TGS票据)</p>
+<p>KDC在HandleTGSRequest中处理TGS_REQ消息
+首先，通过krbtgt hash解密查看票据是否合法</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png" title="kerberos-debuginfo36" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo36.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo36">
+    </a></figure></p>
+<p>之后，计算检查CheckSum中的签名</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png" title="kerberos-debuginfo37" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo37.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo37">
+    </a></figure></p>
+<p>KDC在I_GetTGSTicket中构造TGS</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png" title="kerberos-debuginfo38" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo38.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo38">
+    </a></figure></p>
+<p>通过KdcGetTicketInfo函数获取构建Ticket需要的信息</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png" title="kerberos-debuginfo39" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo39.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo39">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png" title="kerberos-debuginfo40" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo40.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo40">
+    </a></figure></p>
+<p>构建TGSTicket</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png" title="kerberos-debuginfo41" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo41.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo41">
+    </a></figure></p>
+<p>Ticket内容如下</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png" title="kerberos-debuginfo42" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo42.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo42">
+    </a></figure></p>
+<p>向其中添加对于客户端的认证信息
+包括证书的有效时间和认证信息</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png" title="kerberos-debuginfo43" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo43.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo43">
+    </a></figure></p>
+<p>最后申请Reply结构并进行填充，和之前一样进行打包加密
+Ticket为用ServerHash加密的TGSTicket
+enc-part为使用Logon Session Key加密的认证消息，包含Client和Server建立会话的Session Key</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png" title="kerberos-debuginfo44" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo44.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo44">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png" title="kerberos-debuginfo45" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo45.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo45">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo46.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<h3 id="ap_req--as_rep" class="headerLink">
+    <a href="#ap_req--as_rep" class="header-mark"></a>AP_REQ &amp; AS_REP</h3><p>在TGS的请求过程中对于身份的验证便是通过AP_REQ，所以不再赘述</p>
+<h2 id="委派分析" class="headerLink">
+    <a href="#%e5%a7%94%e6%b4%be%e5%88%86%e6%9e%90" class="header-mark"></a>委派分析</h2><h3 id="非约束委派" class="headerLink">
+    <a href="#%e9%9d%9e%e7%ba%a6%e6%9d%9f%e5%a7%94%e6%b4%be" class="header-mark"></a>非约束委派</h3><h4 id="基本流程" class="headerLink">
+    <a href="#%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b" class="header-mark"></a>基本流程</h4><p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo47.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>上图描述了以下协议步骤：</p>
+<ol>
+<li>用户通过发送KRB_AS_REQ消息请求可转发 TGT（forwardable TGT，为了方便我们称为TGT1）</li>
+<li>KDC在KRB_AS_REP消息中返回TGT1</li>
+<li>用户再通过TGT1向KDC请求转发TGT（forwarded TGT，我们称为TGT2）</li>
+<li>在KRB_TGS_REP消息中返回转发TGT2</li>
+<li>用户使用TGT1向KDC申请访问Service1的ST（ServiceTicket）</li>
+<li>TGS返回给用户一个ST</li>
+<li>用户发送KRB_AP_REQ请求至Service1，这个请求中包含了TGT1和ST、TGT2、TGT2的SessionKey</li>
+<li>Service1使用用户的TGT2通过KRB_TGS_REQ发送给KDC，以用户的名义请求能够访问Service2的票据</li>
+<li>KDC在KRB_TGS_REP消息中返回Service2到Service1的票据</li>
+<li>Service1以用户的名义向Service2发送KRB_AP_REQ请求</li>
+<li>Service2响应步骤10中Service1的请求</li>
+<li>Service1响应步骤7中用户的请求</li>
+<li>在这个过程中的TGT转发机制，没有限制Service1对TGT2的使用，也就是说Service1可以通过TGT2来请求任意服务</li>
+<li>KDC返回步骤13中请求的票据，15和16即为Service1通过模拟用户来访问其他Service
+当user访问service1时，如果service1的服务账号开启了unconstrained delegation（非约束委派），则当user访问service1时会将user的TGT发送给service1并保存在内存中以备下次重用，然后service1 就可以利用这张TGT以user的身份去访问域内的任何服务（任何服务是指user能访问的服务）了</li>
+</ol>
+<h4 id="配置" class="headerLink">
+    <a href="#%e9%85%8d%e7%bd%ae" class="header-mark"></a>配置</h4><p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo48.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>每个账户都存在一个属性值UserAccountControl，其值可以决定Kerberos委派的性质
+具体的值及其对应含义请参考：<a href="https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties" target="_blank" rel="noopener noreferrer">https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties</a>
+使用SysinternalsSuite中的ADExplorer工具可以很方便的查看AD域中的所有属性</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo49.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>和非约束委派相关的属性为0x80000</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo50.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<h4 id="调试分析" class="headerLink">
+    <a href="#%e8%b0%83%e8%af%95%e5%88%86%e6%9e%90" class="header-mark"></a>调试分析</h4><p>正常情况下一次请求只会出现一次TGS_REQ
+但是在开启非约束委派的情况下会发起两次</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo51.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>其中途中标号为9的请求对应上述描述中的第5步，为客户端请求需要的服务的ST的过程
+所以kdc-options中的forwarded为0
+sname为cifs</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo53.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo54.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>标号为17的请求为对于TGT2（forwarded TGT）的请求，对应上述描述中的第3步
+所以kdc-options中的forwarded为1
+sname为krbtgt</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo55.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo56.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo57.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>TGT2&mdash; TicketGrantingTicket
+TGT2的SessionKey&mdash;TicketGrantingTicket. SessionKey
+TGT1&mdash; TicketGrantingTicket.Ticket</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo58.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo59.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo60.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>KerbBuildGssChecksum的第三参数Ticket即为ServiceTicket</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo61.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>之后会将该结果后打包加密后放入CheckSumBody-&gt;DelegationInfo中</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo62.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo63.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<h3 id="约束委派" class="headerLink">
+    <a href="#%e7%ba%a6%e6%9d%9f%e5%a7%94%e6%b4%be" class="header-mark"></a>约束委派</h3><h4 id="基本流程-1" class="headerLink">
+    <a href="#%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b-1" class="header-mark"></a>基本流程</h4><p>约束委派在Kerberos中User不会直接发送TGT给服务，而是对发送给service1的认证信息做了限制，不允许service1代表User使用这个TGT去访问其他服务。其中包括一组名为S4U2Self（Service for User to Self）和S4U2Proxy（Service for User to Proxy）的Kerberos协议扩展。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo64.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>请求过程如下：</p>
+<ol>
+<li>用户向Service1发送请求。</li>
+<li>这时在官方文档中的介绍是在这一流程开始之前Service1已经通过KRB_AS_REQ得到了用户用来访问Service1的TGT，然后通过S4U2self扩展模拟用户向KDC请求ST。</li>
+<li>KDC这时返回给Service1一个用于用户验证Service1的ST（我们称为ST1），并且Service1用这个ST1完成和用户的验证过程。</li>
+<li>Service1在步骤3使用模拟用户申请的ST1完成与用户的验证，然后响应用户。
+注：这个过程中其实Service1是获得了用户的TGT和ST1的，但是S4U2Self扩展不允许Service1代表用户去请求其他的服务。</li>
+<li>用户再次向Service1发起请求，此时Service1需要以用户的身份访问Service2。这里官方文档提到了两个点：
+A.Service1已经验证通过，并且有一个有效的TGT。
+B.Service1有从用户到Service1的forwardableST（可转发ST）。个人认为这里的forwardable ST其实也就是ST1。</li>
+<li>Service1代表用户向Service2请求一个用于认证Service2的ST（我们称为ST2）。用户在ST1中通过cname（client name）和crealm（client realm）字段标识。</li>
+<li>KDC在接收到步骤6中Service1的请求之后，会验证PAC（特权属性证书，在第一篇中有说明）的数字签名。如果验证成功或者这个请求没有PAC（不能验证失败），KDC将返回ST2给Service1，不过这个ST2中cname和crealm标识的是用户而不是Service1。</li>
+<li>Service1代表用户使用ST2请求Service2。Service2判断这个请求来自已经通过KDC验证的用户。</li>
+<li>Service2响应Service1的请求。</li>
+<li>Service1响应用户的请求。</li>
+</ol>
+<p>在这个过程中：
+<strong>S4U2self可以代表自身请求针对其自身的Kerberos服务票据(ST)</strong>
+<strong>S4U2proxy可以以用户的名义请求其它服务的ST</strong>
+同时注意forwardable字段，有forwardable标记为可转发的是能够通过S4U2Proxy扩展协议进行转发的，如果没有标记则不能进行转发。
+最后的结果：<strong>在约束委派中服务账号只能获取某用户的ST（也就是TGS），所以只能模拟用户访问特定的服务，是无法获取用户的TGT，如果我们能获取到开启了约束委派的服务用户的明文密码或者NTLM Hash，我们就可以伪造S4U请求，进而伪装成服务用户以任意账户的权限申请访问某服务的ST</strong></p>
+<h4 id="配置-1" class="headerLink">
+    <a href="#%e9%85%8d%e7%bd%ae-1" class="header-mark"></a>配置</h4><p>Windows Server 2003 已经支持约束委派，但是并没有可视化的设置界面，需要通过ADExplorer工具修改属性值，开启约束委派。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo65.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>约束委派对应值为</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo66.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<h4 id="调试分析-1" class="headerLink">
+    <a href="#%e8%b0%83%e8%af%95%e5%88%86%e6%9e%90-1" class="header-mark"></a>调试分析</h4><p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo67.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo68.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>步骤2中S4U2Self是通过KerbGetS4USelfServiceTicket函数完成。
+首先获取Service自身的TGT，进行身份认证</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo69.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>其次将“冒充”客户的身份去申请针对自身的TGS</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo70.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo71.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo72.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo73.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>步骤5中的S4U2Proxy在KerbGetServiceTicketByS4UProxy中完成
+与以往不同的是这次会存在一个AdditionTicket，其中是上一步返回的TGS
+在KDC中会对这个AdditionTicket进行检查
+其中最重要的一步便是通过KerbCheckA2D2Attribute对委派进行限制，只有
+msDS-AllowedToDelegateto中存在的项才允许访问 返回TGS</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo75.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>检查通过后KdcUnpackAdditionalTickets会返回S4UTicketInfo
+内容如下
+<figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo76.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo77.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo78.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png" title="kerberos-debuginfo46" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/kerberos-debuginfo79.png 2x"
+            sizes="auto"
+            alt="kerberos-debuginfo46">
+    </a></figure></p>
+<p>之后便是正常的返回TGS的流程</p>
+<h3 id="基于资源的约束委派" class="headerLink">
+    <a href="#%e5%9f%ba%e4%ba%8e%e8%b5%84%e6%ba%90%e7%9a%84%e7%ba%a6%e6%9d%9f%e5%a7%94%e6%b4%be" class="header-mark"></a>基于资源的约束委派</h3><p>在约束委派中，对于计算机或服务账户的属性设置只能由域管理员进行设置，配置其是否可以委派和委派的服务列表。但是在Windows Server 2008后引入了基于资源的约束委派（Resource-based constrained delegation）。计算机的用户属性中新添了一个全新的项，名为msDS-AllowedToActOnBehalfOfOtherIdentity，这个属性的设置由计算机本身进行，其可以控制谁可以被委托来访问自己的某些资源
+之前的约束委派限制的是Service1是否可以委派其他人，现在基于资源的约束委派可以保证Service2控制自身资源的访问限制，一个是在发起者方进行限制，一个是在接收者方进行防护。
+基于资源的约束委派（Resource-based constrained delegation），它除了不再需要域管理员权限去设置相关属性之外，请求ST的过程是和传统的约束委派大同小异，要注意一点就是传统的约束S4U2Self返回的票据一定是可转发的，如果不可转发那么S4U2Proxy将失败；但是基于资源约束委派不同，就算S4U2Self返回的票据不可转发（可不可以转发由TrustedToAuthenticationForDelegation决定），S4U2Proxy也是可以成功，并且S4U2Proxy返回的票据总是可转发。</p>
+</div>
+
+        
+
+<div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-12-30</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span><a class="link-to-mardown" href=/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.txt target="_blank" rel="noopener noreferrer">阅读原始文档</a>
+                    </span></div>
+            <div class="post-info-share"><button title="分享到 Twitter" data-sharer="twitter" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记"><span class="fab fa-twitter fa-fw"></span></button><button title="分享到 Facebook" data-sharer="facebook" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><span class="fab fa-facebook-square fa-fw"></span></button><button title="分享到 WhatsApp" data-sharer="whatsapp" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记" data-web><span class="fab fa-whatsapp fa-fw"></span></button><button title="分享到 Line" data-sharer="line" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记"><span data-svg-src="/lib/simple-icons/icons/line.min.svg"></span></button><button title="分享到 微博" data-sharer="weibo" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记"><span class="fab fa-weibo fa-fw"></span></button><button title="分享到 Myspace" data-sharer="myspace" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记" data-description=""><span data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></span></button><button title="分享到 Blogger" data-sharer="blogger" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记" data-description=""><span class="fab fa-blogger fa-fw"></span></button><button title="分享到 Evernote" data-sharer="evernote" data-url="http://dre4merp.github.io/kerberos%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-title="Kerberos学习笔记"><span class="fab fa-evernote fa-fw"></span></button></div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/samaccountname-spoofing%E5%AE%8C%E6%95%B4%E5%88%86%E6%9E%90/" class="next" rel="next" title="sAMAccountName spoofing完整分析">sAMAccountName spoofing完整分析<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">dre4merp is trying harder.</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/dre4merp" target="_blank" rel="noopener noreferrer">dre4merp</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/lightgallery/lightgallery.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":100,"findAllMatches":false,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":false,"ignoreLocation":false,"isCaseSensitive":false,"location":0,"maxResultLength":10,"minMatchCharLength":2,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":0.3,"type":"fuse","useExtendedSearch":false},"sharerjs":true,"table":{"sort":true}};</script><script type="text/javascript" src="/lib/tablesort/tablesort.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lightgallery.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-thumbnail.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-zoom.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-KDR7NTQEPH', { 'anonymize_ip': true });
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-KDR7NTQEPH" async></script></div>
+</body>
+
+</html>

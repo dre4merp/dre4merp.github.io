@@ -1,0 +1,925 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>深入理解Windows堆管理机制 - dre4merp&#39;s blog</title><meta name="Description" content="This is dre4merp&#39;s blog."><meta property="og:title" content="深入理解Windows堆管理机制" />
+<meta property="og:description" content="理解堆栈是分配局部变量和储存函数调用参数及返回地址的主要场所，栈空间是在程序设计时已经规定好怎么使用，使用多少内存空间的。栈变量在使用的时候" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" /><meta property="og:image" content="http://dre4merp.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-06-19T23:36:55+08:00" />
+<meta property="article:modified_time" content="2022-06-19T23:36:55+08:00" /><meta property="og:site_name" content="dre4merp&#39;s blog" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://dre4merp.github.io/logo.png"/>
+
+<meta name="twitter:title" content="深入理解Windows堆管理机制"/>
+<meta name="twitter:description" content="理解堆栈是分配局部变量和储存函数调用参数及返回地址的主要场所，栈空间是在程序设计时已经规定好怎么使用，使用多少内存空间的。栈变量在使用的时候"/>
+<meta name="application-name" content="DoIt">
+<meta name="apple-mobile-web-app-title" content="DoIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" /><link rel="prev" href="http://dre4merp.github.io/cve-202226923%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/" /><link rel="next" href="http://dre4merp.github.io/explorer_dump_analysis/" />
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "深入理解Windows堆管理机制",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/dre4merp.github.io\/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6\/"
+        },"genre": "posts","wordcount":  5610 ,
+        "url": "http:\/\/dre4merp.github.io\/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6\/","datePublished": "2022-06-19T23:36:55+08:00","dateModified": "2022-06-19T23:36:55+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"authors": [{
+                        "@type": "Person",
+                        "name": "dre4merp"                    
+                    }],"description": ""
+    }
+    </script></head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme;   window.isDark = window.theme !== 'light' }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('dark' === 'light' || 'dark' === 'dark' || 'dark' === 'black') setTheme('dark'), saveTheme('dark'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+        window.switchThemeEventSet = new Set()
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="dre4merp&#39;s blog">dre4merp&#39;s blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 归档 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/about/"> 关于我 </a><a class="menu-item" href="/index.xml"> 订阅 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-select" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                    <select class="color-theme-select" id="theme-select-desktop" title="切换主题">
+                        <option value="light">浅色</option>
+                        <option value="dark">深色</option>
+                        <option value="black">黑色</option>
+                        <option value="auto">跟随系统</option>
+                    </select>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="dre4merp&#39;s blog">dre4merp&#39;s blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">归档</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/about/" title="">关于我</a><a class="menu-item" href="/index.xml" title="">订阅</a><a href="javascript:void(0);" class="menu-item theme-select" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+                <select class="color-theme-select" id="theme-select-mobile" title="切换主题">
+                    <option value="light">浅色</option>
+                    <option value="dark">深色</option>
+                    <option value="black">黑色</option>
+                    <option value="auto">跟随系统</option>
+                </select>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#理解堆">理解堆</a></li>
+    <li><a href="#堆和栈的区别">堆和栈的区别</a></li>
+    <li><a href="#堆管理器结构">堆管理器结构</a></li>
+    <li><a href="#进程默认堆">进程默认堆</a></li>
+    <li><a href="#进程私有堆">进程私有堆</a></li>
+    <li><a href="#windows-xp-sp2--windows-2003">Windows XP SP2 – Windows 2003</a>
+      <ul>
+        <li><a href="#堆的数据结构">堆的数据结构</a>
+          <ul>
+            <li><a href="#堆段">堆段</a></li>
+            <li><a href="#堆块">堆块</a></li>
+            <li><a href="#空表">空表</a></li>
+            <li><a href="#空表位图">空表位图</a></li>
+            <li><a href="#堆缓存">堆缓存</a></li>
+            <li><a href="#快表">快表</a></li>
+          </ul>
+        </li>
+        <li><a href="#堆的管理策略">堆的管理策略</a>
+          <ul>
+            <li><a href="#后端堆管理策略">后端堆管理策略</a></li>
+            <li><a href="#前端堆管理策略">前端堆管理策略</a></li>
+            <li><a href="#堆块分配">堆块分配</a></li>
+            <li><a href="#堆块释放">堆块释放</a></li>
+            <li><a href="#堆块合并">堆块合并</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#windows-vista--windows-7">Windows Vista – Windows 7</a>
+      <ul>
+        <li><a href="#术语">术语</a></li>
+        <li><a href="#重要结构">重要结构</a>
+          <ul>
+            <li><a href="#_heapheapbase">_HEAP(HeapBase)</a></li>
+            <li><a href="#_heap_list_lookupheapbase-blocksindex">_HEAP_LIST_LOOKUP(HeapBase-&gt;BlocksIndex)</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#windows-10">Windows 10</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">深入理解Windows堆管理机制</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><span class='author'><span class="author fas fa-user-circle fa-fw"></span><span class='screen-reader-text'>  </span><a href='http://dre4merp.github.io/authors/dre4merp'>dre4merp</a></span>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-06-19">2022-06-19</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2022-06-19">2022-06-19</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5610 字&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#理解堆">理解堆</a></li>
+    <li><a href="#堆和栈的区别">堆和栈的区别</a></li>
+    <li><a href="#堆管理器结构">堆管理器结构</a></li>
+    <li><a href="#进程默认堆">进程默认堆</a></li>
+    <li><a href="#进程私有堆">进程私有堆</a></li>
+    <li><a href="#windows-xp-sp2--windows-2003">Windows XP SP2 – Windows 2003</a>
+      <ul>
+        <li><a href="#堆的数据结构">堆的数据结构</a>
+          <ul>
+            <li><a href="#堆段">堆段</a></li>
+            <li><a href="#堆块">堆块</a></li>
+            <li><a href="#空表">空表</a></li>
+            <li><a href="#空表位图">空表位图</a></li>
+            <li><a href="#堆缓存">堆缓存</a></li>
+            <li><a href="#快表">快表</a></li>
+          </ul>
+        </li>
+        <li><a href="#堆的管理策略">堆的管理策略</a>
+          <ul>
+            <li><a href="#后端堆管理策略">后端堆管理策略</a></li>
+            <li><a href="#前端堆管理策略">前端堆管理策略</a></li>
+            <li><a href="#堆块分配">堆块分配</a></li>
+            <li><a href="#堆块释放">堆块释放</a></li>
+            <li><a href="#堆块合并">堆块合并</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#windows-vista--windows-7">Windows Vista – Windows 7</a>
+      <ul>
+        <li><a href="#术语">术语</a></li>
+        <li><a href="#重要结构">重要结构</a>
+          <ul>
+            <li><a href="#_heapheapbase">_HEAP(HeapBase)</a></li>
+            <li><a href="#_heap_list_lookupheapbase-blocksindex">_HEAP_LIST_LOOKUP(HeapBase-&gt;BlocksIndex)</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#windows-10">Windows 10</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="理解堆" class="headerLink">
+    <a href="#%e7%90%86%e8%a7%a3%e5%a0%86" class="header-mark"></a>理解堆</h2><p>栈是分配局部变量和储存函数调用参数及返回地址的主要场所，栈空间是在程序设计时已经规定好怎么使用，使用多少内存空间的。栈变量在使用的时候不需要额外的申请操作，系统栈会根据函数中的变量声明自动在函数栈帧中给其预留空间。栈空间由系统维护，它的分配（如 sub esp ，xx ;）和回收（如 add esp，xxx）都由系统来完成，最终达到栈平衡。所有的这些对程序员来说都是透明的。</p>
+<p>同时栈也存在一些不足之处。</p>
+<ol>
+<li>栈空间（尤其是内核态栈）的容量是相对较小的，其很难完成一些需要很大空间的操作。</li>
+<li>栈空间会在函数返回时释放，不适合保存生命周期较长的变量和对象。</li>
+<li>栈空间在程序编译时确定大小，无法分配运行期才能决定大小的缓冲区。</li>
+</ol>
+<p>堆（Heap）克服了栈的以上局限，是程序申请和使用内存空间的另一种重要途径。应用程序通过内存分配函数（如 malloc 或 HeapAlloc）或 new 操作符获得的内存空间都来自于堆。</p>
+<p>通过堆，内存管理器（Memory Manager）将一块较大的内存空间委托给堆管理器（Heap Manager）来管理。堆管理器将大块的内存分割成不同大小的很多个小块来满足应用程序的需要。这样的分层设计可以减轻内存管理器的负担，同时大大缩短应用程序申请内存分配所需的时间，提高程序的运行速度。</p>
+<p>下图展示了操作系统中不同层次的内存分配方法。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png" title="20220512112641" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512112641.png 2x"
+            sizes="auto"
+            alt="20220512112641">
+    </a></figure></p>
+<h2 id="堆和栈的区别" class="headerLink">
+    <a href="#%e5%a0%86%e5%92%8c%e6%a0%88%e7%9a%84%e5%8c%ba%e5%88%ab" class="header-mark"></a>堆和栈的区别</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>堆内存</th>
+<th>栈内存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>典型用例</td>
+<td>动态增长的链表等数据结构</td>
+<td>函数局部数组</td>
+</tr>
+<tr>
+<td>申请方式</td>
+<td>需要用函数申请，通过返回的指针使用</td>
+<td>在程序中直接声明即可</td>
+</tr>
+<tr>
+<td>释放方式</td>
+<td>需要把指针传给专用的释放函数</td>
+<td>函数返回时，由系统自动回收</td>
+</tr>
+<tr>
+<td>管理方式</td>
+<td>需要程序员处理申请与释放</td>
+<td>申请后直接使用，申请与释放由系统自动完成，最后达到栈区平衡</td>
+</tr>
+<tr>
+<td>所处位置</td>
+<td>变化范围很大</td>
+<td></td>
+</tr>
+<tr>
+<td>增长方向</td>
+<td>由内存低址向高址排列（不考虑碎片等情况）</td>
+<td>由内存高址向低址增加</td>
+</tr>
+</tbody>
+</table>
+<h2 id="堆管理器结构" class="headerLink">
+    <a href="#%e5%a0%86%e7%ae%a1%e7%90%86%e5%99%a8%e7%bb%93%e6%9e%84" class="header-mark"></a>堆管理器结构</h2><p>每个进程通常都有很多个堆，程序可以通过自己的需要创建新的堆。它会有一个默认的进程堆，指向这个堆的指针被存放在进程环境块 PEB(Process Environment Block) 中，而这个进程的所有堆，都以链表的形式被挂在 PEB 上。</p>
+<p>如下图所示，堆管理器被结构化为 2 层：一个可选的前端层，以及核心堆层（也叫做后端堆层）。核心堆处理基本功能，并且是最为常见跨越用户与内核模式堆的实现。其核心功能包括段内块（blocks inside segments）的管理，段的管理，扩展堆的策略，提交和回收内存，以及大型块的管理（之后会具体分析）。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg" title="Heap-manager-layers" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/Heap-manager-layers.jpg 2x"
+            sizes="auto"
+            alt="Heap-manager-layers">
+    </a></figure></p>
+<h2 id="进程默认堆" class="headerLink">
+    <a href="#%e8%bf%9b%e7%a8%8b%e9%bb%98%e8%ae%a4%e5%a0%86" class="header-mark"></a>进程默认堆</h2><p>Windows 系统在创建一个新的进程时，在加载器函数执行新城的用户态初始化阶段，会调用<code>RtlCreateHeap</code>函数为进程创建第一个堆，作为进程的默认堆（Process Heap）。创建好的堆句柄会被保存到进程环境块（PEB）的<code>ProcessHeap</code>字段中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _PEB 7ffdb000
+</span></span><span class="line"><span class="cl">nt!_PEB
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x018 ProcessHeap      : 0x00090000 Void                    //进程默认堆
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x078 HeapSegmentReserve : 0x100000                         //堆的默认保留大小，字节数，1MB
+</span></span><span class="line"><span class="cl">   +0x07c HeapSegmentCommit : 0x2000                            //堆的默认提交大小，8KB （两个内存页，x86 默认内存页 4KB）
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x088 NumberOfHeaps    : 0x10                               //堆的数量
+</span></span><span class="line"><span class="cl">   +0x08c MaximumNumberOfHeaps : 0x10                           //堆的最大数量
+</span></span><span class="line"><span class="cl">   +0x090 ProcessHeaps     : 0x7c99cfc0  -&gt; 0x00090000 Void     //堆句柄数组
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dd 0x7c99cfc0 l 10
+</span></span><span class="line"><span class="cl">7c99cfc0  00090000 00190000 001a0000 00410000
+</span></span><span class="line"><span class="cl">7c99cfd0  00420000 00440000 00030000 003d0000
+</span></span><span class="line"><span class="cl">7c99cfe0  00890000 009a0000 01810000 01830000
+</span></span><span class="line"><span class="cl">7c99cff0  01cd0000 01dd0000 016e0000 016f0000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="进程私有堆" class="headerLink">
+    <a href="#%e8%bf%9b%e7%a8%8b%e7%a7%81%e6%9c%89%e5%a0%86" class="header-mark"></a>进程私有堆</h2><h2 id="windows-xp-sp2--windows-2003" class="headerLink">
+    <a href="#windows-xp-sp2--windows-2003" class="header-mark"></a>Windows XP SP2 – Windows 2003</h2><h3 id="堆的数据结构" class="headerLink">
+    <a href="#%e5%a0%86%e7%9a%84%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" class="header-mark"></a>堆的数据结构</h3><p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png" title="20220512234513" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220512234513.png 2x"
+            sizes="auto"
+            alt="20220512234513">
+    </a></figure></p>
+<h4 id="堆段" class="headerLink">
+    <a href="#%e5%a0%86%e6%ae%b5" class="header-mark"></a>堆段</h4><p>堆管理器在向内存管理器成功申请一块内存后，该内存被称为一个内存段（Segment）。堆中的第一个内存段，我们称其为 0 号段（Segment00）。每个堆最少都会拥有一个段，最多拥有 64 个段。</p>
+<p>在 0 号段的开头出存放当前堆的头信息，是一个<code>HEAP</code>结构，保存了自身的关键信息。此外每个段都有一个<code>HEAP_SEGMENT</code>结构来描述自身，0 号段位于<code>HEAP</code>之后，其他段位于起始位置。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP 00090000
+</span></span><span class="line"><span class="cl">ntdll!_HEAP
+</span></span><span class="line"><span class="cl">   +0x000 Entry            : _HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x008 Signature        : 0xeeffeeff                                     //标志
+</span></span><span class="line"><span class="cl">   +0x00c Flags            : 2
+</span></span><span class="line"><span class="cl">   +0x010 ForceFlags       : 0
+</span></span><span class="line"><span class="cl">   +0x014 VirtualMemoryThreshold : 0xfe00                                   //最大堆块大小
+</span></span><span class="line"><span class="cl">   +0x018 SegmentReserve   : 0x100000                                       
+</span></span><span class="line"><span class="cl">   +0x01c SegmentCommit    : 0x2000
+</span></span><span class="line"><span class="cl">   +0x020 DeCommitFreeBlockThreshold : 0x200
+</span></span><span class="line"><span class="cl">   +0x024 DeCommitTotalFreeThreshold : 0x2000
+</span></span><span class="line"><span class="cl">   +0x028 TotalFreeSize    : 0x1687
+</span></span><span class="line"><span class="cl">   +0x02c MaximumAllocationSize : 0x7ffdefff
+</span></span><span class="line"><span class="cl">   +0x030 ProcessHeapsListIndex : 1
+</span></span><span class="line"><span class="cl">   +0x032 HeaderValidateLength : 0x608
+</span></span><span class="line"><span class="cl">   +0x034 HeaderValidateCopy : (null) 
+</span></span><span class="line"><span class="cl">   +0x038 NextAvailableTagIndex : 0
+</span></span><span class="line"><span class="cl">   +0x03a MaximumTagIndex  : 0
+</span></span><span class="line"><span class="cl">   +0x03c TagEntries       : (null) 
+</span></span><span class="line"><span class="cl">   +0x040 UCRSegments      : 0x00e70000 _HEAP_UCR_SEGMENT
+</span></span><span class="line"><span class="cl">   +0x044 UnusedUnCommittedRanges : 0x000905e8 _HEAP_UNCOMMMTTED_RANGE
+</span></span><span class="line"><span class="cl">   +0x048 AlignRound       : 0xf
+</span></span><span class="line"><span class="cl">   +0x04c AlignMask        : 0xfffffff8
+</span></span><span class="line"><span class="cl">   +0x050 VirtualAllocdBlocks : _LIST_ENTRY [ 0x90050 - 0x90050 ]
+</span></span><span class="line"><span class="cl">   +0x058 Segments         : [64] 0x00090640 _HEAP_SEGMENT                  //保存堆的所有段，为数组，所以最多拥有 64 个段
+</span></span><span class="line"><span class="cl">   +0x158 u                : __unnamed
+</span></span><span class="line"><span class="cl">   +0x168 u2               : __unnamed
+</span></span><span class="line"><span class="cl">   +0x16a AllocatorBackTraceIndex : 0
+</span></span><span class="line"><span class="cl">   +0x16c NonDedicatedListLength : 6
+</span></span><span class="line"><span class="cl">   +0x170 LargeBlocksIndex : (null) 
+</span></span><span class="line"><span class="cl">   +0x174 PseudoTagEntries : (null) 
+</span></span><span class="line"><span class="cl">   +0x178 FreeLists        : [128] _LIST_ENTRY [ 0x119e60 - 0x14e008 ]     //空闲链表
+</span></span><span class="line"><span class="cl">   +0x578 LockVariable     : 0x00090608 _HEAP_LOCK
+</span></span><span class="line"><span class="cl">   +0x57c CommitRoutine    : (null) 
+</span></span><span class="line"><span class="cl">   +0x580 FrontEndHeap     : 0x00090688 Void                               //前端堆
+</span></span><span class="line"><span class="cl">   +0x584 FrontHeapLockCount : 0                                           //前端堆同步锁计数
+</span></span><span class="line"><span class="cl">   +0x586 FrontEndHeapType : 0x1 &#39;&#39;                                        //前端堆的类型
+</span></span><span class="line"><span class="cl">   +0x587 LastSegmentIndex : 0 &#39;&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP_SEGMENT 00090640
+</span></span><span class="line"><span class="cl">ntdll!_HEAP_SEGMENT
+</span></span><span class="line"><span class="cl">   +0x000 Entry            : _HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x008 Signature        : 0xffeeffee
+</span></span><span class="line"><span class="cl">   +0x00c Flags            : 0
+</span></span><span class="line"><span class="cl">   +0x010 Heap             : 0x00090000 _HEAP                      //段所属的堆
+</span></span><span class="line"><span class="cl">   +0x014 LargestUnCommittedRange : 0x29000
+</span></span><span class="line"><span class="cl">   +0x018 BaseAddress      : 0x00090000 Void                       //段的基地址
+</span></span><span class="line"><span class="cl">   +0x01c NumberOfPages    : 0x100                                 //段的内存页数
+</span></span><span class="line"><span class="cl">   +0x020 FirstEntry       : 0x00090680 _HEAP_ENTRY                //第一个堆块
+</span></span><span class="line"><span class="cl">   +0x024 LastValidEntry   : 0x00190000 _HEAP_ENTRY                //堆块的边界值
+</span></span><span class="line"><span class="cl">   +0x028 NumberOfUnCommittedPages : 0x3b
+</span></span><span class="line"><span class="cl">   +0x02c NumberOfUnCommittedRanges : 6
+</span></span><span class="line"><span class="cl">   +0x030 UnCommittedRanges : 0x000905a8 _HEAP_UNCOMMMTTED_RANGE
+</span></span><span class="line"><span class="cl">   +0x034 AllocatorBackTraceIndex : 0
+</span></span><span class="line"><span class="cl">   +0x036 Reserved         : 0
+</span></span><span class="line"><span class="cl">   +0x038 LastEntryInSegment : 0x00143000 _HEAP_ENTRY              //最后一个堆块
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="堆块" class="headerLink">
+    <a href="#%e5%a0%86%e5%9d%97" class="header-mark"></a>堆块</h4><p>为了更高效的分配内存，堆区的内存按不同大小组织成块，以堆块为单位进行标识，而不是传统的按字节标识。一个堆块包括两个部分：块首和块身。块首是一个<code>HEAP_ENTRY</code>结构，大小为八个字节，用来标识这个堆块自身的信息。包括前面说过的<code>HEAP</code>结构本身也是一个堆块，所以其开始部分也是一个<code>HEAP_ENTRY</code>结构。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dx -id 0,0,81f7a980 -r1 (*((ntdll!_HEAP_ENTRY *)0x90000))
+</span></span><span class="line"><span class="cl">(*((ntdll!_HEAP_ENTRY *)0x90000))                 [Type: _HEAP_ENTRY]
+</span></span><span class="line"><span class="cl">    [+0x000] Size             : 0xc8 [Type: unsigned short]
+</span></span><span class="line"><span class="cl">    [+0x002] PreviousSize     : 0x0 [Type: unsigned short]
+</span></span><span class="line"><span class="cl">    [+0x000] SubSegmentCode   : 0xc8 [Type: void *]
+</span></span><span class="line"><span class="cl">    [+0x004] SmallTagIndex    : 0x4 [Type: unsigned char]
+</span></span><span class="line"><span class="cl">    [+0x005] Flags            : 0x1 [Type: unsigned char]
+</span></span><span class="line"><span class="cl">    [+0x006] UnusedBytes      : 0x0 [Type: unsigned char]
+</span></span><span class="line"><span class="cl">    [+0x007] SegmentIndex     : 0x0 [Type: unsigned char]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>HEAP_ENTRY</code>前两个字节以分配粒度表示堆块的大小，分配粒度通常是 8，这意味着每个堆块的最大值是<code>0x10000*8=0x80000=512KB</code>。因为每个堆块知识有 8 字节的管理信息，因此应用程序可以使用的最大堆块便是<code>0x80000-8=0x7FFF8</code>。更大块的分配后面讲解。</p>
+<p>在 Windows 中，占用态的堆块被使用它的程序索引，而堆表只索引所有空闲态的堆块。空闲双向链表 Freelist 便是索引空闲态堆块的链表。</p>
+<h4 id="空表" class="headerLink">
+    <a href="#%e7%a9%ba%e8%a1%a8" class="header-mark"></a>空表</h4><p>空闲堆块的块首中包含一对重要的指针，这对指针用于将空闲堆块组织成双向链表。按照堆块的大小不同，空表总共被分为 128 条。</p>
+<p>Windows 中的空表其实是一个 128 项的指针数组，每项包含两个指针，用于指向空闲的堆块。</p>
+<p>空闲堆块的大小＝索引项（ID）×8（字节）</p>
+<p>而其中索引为 0 的项中保存的是所有超过 1024（包含）字节的空闲堆块，按照堆块大小升序排列。具体如下图所示。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png" title="20220414100256" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100256.png 2x"
+            sizes="auto"
+            alt="20220414100256">
+    </a></figure></p>
+<p>该结构指针位于<code>HEAP</code>的<code>+0x178</code>处，具体分析 Freelist 可以使用<code>!heap -f xxxxxxxx</code>命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP 00090000
+</span></span><span class="line"><span class="cl">ntdll!_HEAP
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x178 FreeLists        : [128] _LIST_ENTRY [ 0x119e60 - 0x14e008 ]
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="空表位图" class="headerLink">
+    <a href="#%e7%a9%ba%e8%a1%a8%e4%bd%8d%e5%9b%be" class="header-mark"></a>空表位图</h4><p>FreeListInUse 是一个大小为 16 字节的结构，位于 HeapBase 的 <code>+0x0158</code> 处。这个字字段的每个 bit 位组成了一个 bitmap，标识着对应的<code>FreeList[n]</code>中是否存在空闲块。这个字段的目的是为了在通过 FreeList 分配内存时，扫描 FreeList 来加速分配。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP 00090000
+</span></span><span class="line"><span class="cl">ntdll!_HEAP
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x158 u                : __unnamed
+</span></span><span class="line"><span class="cl">   +0x168 u2               : __unnamed
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kd&gt; dx -id 0,0,81cdd520 -r1 (*((ntdll!__unnamed *)0x90158))
+</span></span><span class="line"><span class="cl">(*((ntdll!__unnamed *)0x90158))                 [Type: __unnamed]
+</span></span><span class="line"><span class="cl">    [+0x000] FreeListsInUseUlong [Type: unsigned long [4]]
+</span></span><span class="line"><span class="cl">    [+0x000] FreeListsInUseBytes [Type: unsigned char [16]]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="堆缓存" class="headerLink">
+    <a href="#%e5%a0%86%e7%bc%93%e5%ad%98" class="header-mark"></a>堆缓存</h4><p>堆缓存是一个包含有 896 个指针的数组，数组中的指针为 NULL 指向 0 号空表中 1024-8192 字节的空闲堆块。数组中的每个元素都对应着 0 号空表中大小为 (1K+8 字节*其索引号）的空闲堆块，若 0 号空表中存在与其大小匹配的空闲堆块，则堆缓存数组中对应的元素为指向该空闲堆块的指针，若无，则对应元素为 NULL。堆缓存数组中的最后一个元素较为特殊，该元素并不会仅指向大小为 8192 字节的空闲堆块，而是指向 0 号空表中第一个大于等于 8192 字节的空闲堆块。为加快对堆缓存的遍历，又引入了堆缓存位图对堆缓存中的非空指针进行了标记，其作用机理与上文中的空表位图相同，在此不做过多赘述。在利用空表位图从非 0 号空表中分配内存失败后，系统将尝试通过堆缓存位图索引到堆缓存数组查找满足分配大小的 0 号空表中的空闲堆块。</p>
+<p>TODO: windbg 调试信息</p>
+<h4 id="快表" class="headerLink">
+    <a href="#%e5%bf%ab%e8%a1%a8" class="header-mark"></a>快表</h4><p>快表是 Windows 用来加速堆块分配而采用的一种堆表。这里之所以把它叫做“快表”是因为这类单向链表中从来不会发生堆块合并（其中的空闲块块首被设置为占用态，用来防止堆块合并）。</p>
+<p>快表也有 128 条，组织结构与空表类似，只是其中的堆块按照单链表组织。快表总是被初始化为空，而且每条快表最多只有 4 个结点，故很快就会被填满。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png" title="20220414100848" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/20220414100848.png 2x"
+            sizes="auto"
+            alt="20220414100848">
+    </a></figure></p>
+<p>该结构指针位于<code>HEAP</code>的<code>+0x178</code>处，具体分析空表可以使用<code>!heap -f xxxxxxxx</code>命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP 00090000
+</span></span><span class="line"><span class="cl">ntdll!_HEAP
+</span></span><span class="line"><span class="cl">   ...
+</span></span><span class="line"><span class="cl">   +0x580 FrontEndHeap     : 0x00090688 Void
+</span></span><span class="line"><span class="cl">   ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP_LOOKASIDE 0x00090688+30+30
+</span></span><span class="line"><span class="cl">nt!_HEAP_LOOKASIDE
+</span></span><span class="line"><span class="cl">   +0x000 ListHead         : _SLIST_HEADER
+</span></span><span class="line"><span class="cl">   +0x008 Depth            : 0x20
+</span></span><span class="line"><span class="cl">   +0x00a MaximumDepth     : 0x100
+</span></span><span class="line"><span class="cl">   +0x00c TotalAllocates   : 0xe63
+</span></span><span class="line"><span class="cl">   +0x010 AllocateMisses   : 0xde
+</span></span><span class="line"><span class="cl">   +0x014 TotalFrees       : 0xd8e
+</span></span><span class="line"><span class="cl">   +0x018 FreeMisses       : 0
+</span></span><span class="line"><span class="cl">   +0x01c LastTotalAllocates : 0x200
+</span></span><span class="line"><span class="cl">   +0x020 LastAllocateMisses : 0x5d
+</span></span><span class="line"><span class="cl">   +0x024 Counters         : [2] 0x44
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kd&gt; dx -id 0,0,81f7a980 -r1 (*((ntkrnlpa!_SLIST_HEADER *)0x906e8))
+</span></span><span class="line"><span class="cl">(*((ntkrnlpa!_SLIST_HEADER *)0x906e8))                 [Type: _SLIST_HEADER]
+</span></span><span class="line"><span class="cl">    [+0x000] Alignment        : 0xd8e0009000e0c28 [Type: unsigned __int64]
+</span></span><span class="line"><span class="cl">    [+0x000] Next             [Type: _SINGLE_LIST_ENTRY]
+</span></span><span class="line"><span class="cl">    [+0x004] Depth            : 0x9 [Type: unsigned short]
+</span></span><span class="line"><span class="cl">    [+0x006] Sequence         : 0xd8e [Type: unsigned short]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kd&gt; dx -id 0,0,81f7a980 -r1 (*((ntkrnlpa!_SINGLE_LIST_ENTRY *)0x906e8))
+</span></span><span class="line"><span class="cl">(*((ntkrnlpa!_SINGLE_LIST_ENTRY *)0x906e8))                 [Type: _SINGLE_LIST_ENTRY]
+</span></span><span class="line"><span class="cl">    [+0x000] Next             : 0xe0c28 [Type: _SINGLE_LIST_ENTRY *]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kd&gt; dt _HEAP_ENTRY 0xe0c28-8
+</span></span><span class="line"><span class="cl">ntdll!_HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x000 Size             : 2
+</span></span><span class="line"><span class="cl">   +0x002 PreviousSize     : 8
+</span></span><span class="line"><span class="cl">   +0x000 SubSegmentCode   : 0x00080002 Void
+</span></span><span class="line"><span class="cl">   +0x004 SmallTagIndex    : 0x80 &#39;&#39;
+</span></span><span class="line"><span class="cl">   +0x005 Flags            : 0x1 &#39;&#39;
+</span></span><span class="line"><span class="cl">   +0x006 UnusedBytes      : 0xe &#39;&#39;
+</span></span><span class="line"><span class="cl">   +0x007 SegmentIndex     : 0 &#39;&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kd&gt; !heap -x 0xe0c28-8
+</span></span><span class="line"><span class="cl">Entry     User      Heap      Segment       Size  PrevSize  Unused    Flags
+</span></span><span class="line"><span class="cl">-----------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">000e0c20  000e0c28  00090000  00090640        10        40         e  busy 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="堆的管理策略" class="headerLink">
+    <a href="#%e5%a0%86%e7%9a%84%e7%ae%a1%e7%90%86%e7%ad%96%e7%95%a5" class="header-mark"></a>堆的管理策略</h3><p>在内存中，堆块按大小分为 3 种，分别为小块 (&lt;1KB)、大块 (&lt;512KB) 和巨块 (≥512KB)，堆块间主要存在 3 中操作方式，分别是堆块的分配、堆块的释放、堆块的合并。</p>
+<h4 id="后端堆管理策略" class="headerLink">
+    <a href="#%e5%90%8e%e7%ab%af%e5%a0%86%e7%ae%a1%e7%90%86%e7%ad%96%e7%95%a5" class="header-mark"></a>后端堆管理策略</h4><p>从空表进行堆块分配时，首先会找到维护对应大小的空表，将最后链入表中的空闲堆块从表中卸下，分配给用户使用，并将空表头的后项指针指向被卸下的堆块的后项堆块。若对应大小的空表内分配失败，则会寻找次优项，在下一个空表中进行分配，直到寻找到能够满足内存分配的最小内存的空闲堆块。当在空表中寻找次优项成功时，会进行切割分配，即从找到的较大堆块中切割下申请大小的堆块分配给程序使用，并将切割剩余的部分按大小加上堆头链入对应的空表。若将所有除 0 号空表外的所有空表都遍历完仍然没有分配成功，则判断 0 号空表中的最后一个堆块大小是否大于所需分配内存大小，若大于则从 0 号空表中正向查找满足分配大小的最小堆块进行分配。</p>
+<h4 id="前端堆管理策略" class="headerLink">
+    <a href="#%e5%89%8d%e7%ab%af%e5%a0%86%e7%ae%a1%e7%90%86%e7%ad%96%e7%95%a5" class="header-mark"></a>前端堆管理策略</h4><p>从快表进行堆块分配时，首先会通过用户申请堆块大小索引到维护对应大小的快表，将最后链入表中的空闲堆块从表中卸下，分配给用户使用，并将快表头指向后项空闲堆块。</p>
+<h4 id="堆块分配" class="headerLink">
+    <a href="#%e5%a0%86%e5%9d%97%e5%88%86%e9%85%8d" class="header-mark"></a>堆块分配</h4><p>堆块在进行分配时，主要会从上文提到的快表和空表中进行分配。</p>
+<p>堆的分配被划分为前端堆管理器 (Front-End Manager) 和后端堆管理器 (Back-End Manager)，其中前端堆管理器主要由上文中提到的快表有关的分配机制构成，后端堆管理器则是由空表有关的分配机制构成。</p>
+<p>在用户申请分配某一大小的内存空间时，系统会首先判断申请的堆块是否属于巨块范畴，若是巨块，则采用虚分配，在漏洞利用中遇到较少，本文不予讨论。若申请大块，则首先考虑堆缓存进行分配，若分配不成功，则从 0 号空表中寻找最合适的空闲块进行分配。若申请小块，则首先查看对应大小的快表中有没有空闲的堆块，若无则查看对应大小的空表中有没有空闲的堆块，若无则通过空表位图查找更大的空表中有没有空闲的堆块进行切割分配，若无则采用堆缓存进行分配，若分配失败，则从 0 号空表中寻找最适合的空闲快进行分配，若依然失败，则会先进行内存紧缩后再尝试分配。堆块分配流程如下图所示。</p>
+<p><figure><a class="lightgallery" href="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png" title="HeapChunkAllocate" data-thumbnail="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png">
+        <img
+            
+            loading="lazy"
+            src="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png"
+            srcset="https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png 1.5x, https://cdn.jsdelivr.net/gh/dre4merp/Drawing-bed@main/images/HeapChunkAllocate.png 2x"
+            sizes="auto"
+            alt="HeapChunkAllocate">
+    </a></figure></p>
+<h4 id="堆块释放" class="headerLink">
+    <a href="#%e5%a0%86%e5%9d%97%e9%87%8a%e6%94%be" class="header-mark"></a>堆块释放</h4><p>堆块释放，即将堆块从占用状态更改为空闲状态。在准备释放某一大小的内存空间时，首先会判断释放释放的堆块是否属于巨块范畴，若是巨块，则直接将该空间释放，不会进入任何堆表。若是大块，则尝试将其释放入堆缓存，若堆缓存已满，则链入 0 号空表。若是小块，则首先尝试链入对应大小的快表，若链入快表，为了加快堆块的分配，系统不会更改其占用状态。若对应大小的快表中已经链满了 4 个空闲堆块，则将该堆块链入对应大小的空表中。</p>
+<h4 id="堆块合并" class="headerLink">
+    <a href="#%e5%a0%86%e5%9d%97%e5%90%88%e5%b9%b6" class="header-mark"></a>堆块合并</h4><p>在进行堆块释放时，若释放堆块直接进入空表（链接在快表中的空闲堆块不会进行合并操作），并且与该堆块物理地址相邻的堆块同为空闲态，则会进行堆块的合并。在进行堆块合并时，会将堆块从空表中卸下，将两个相邻的内存空间整合后更新新空闲堆块的堆头信息，并根据新空闲堆块的大小链入相应大小的空表中。除了堆块的释放会触发堆块合并外，在申请堆块时，若未成功从快表、堆缓存及空表中分配空间，则会触发内存紧缩。内存紧缩会将堆空间中的所有空闲堆块，无论地址是否连续，都整合成一个大的空闲堆块再进行堆块分配。</p>
+<h2 id="windows-vista--windows-7" class="headerLink">
+    <a href="#windows-vista--windows-7" class="header-mark"></a>Windows Vista – Windows 7</h2><h3 id="术语" class="headerLink">
+    <a href="#%e6%9c%af%e8%af%ad" class="header-mark"></a>术语</h3><p><code>block</code>: 表示 8 字节连续内存。它是堆块头部在引用大小时所用的最小度量单位。一个 chunk 是一片连续的内存空间，可以使用 blocks 或 bytes 来度量。</p>
+<p><code>BlocksIndex</code>: 是<code>_HEAP_LIST_LOOKUP</code>结构的别名。BlocksIndex 结构体通过 Lists 来管理 chunks，低于 0x400（1024）字节的 chunks 所在的 Lists 作为第一个 BlocksIndex，而从 0x400 到 0x4000(16k) 的块所在的 Lists 作为第二个 BlocksIndex。大于 16k 的且低于 DeCommitThreshold 和 0xFE00 blocks 的 chunks 会被组织在类似 FreeList[0] 的结构体中（在文章后面讨论）。<strong>专用 FreeLists 的概念已经消失</strong></p>
+<p><code>ListHint, FreeList</code> : 用来表示指向 Heap-&gt;FreeLists 中特定位置的一个链表。</p>
+<p><code>HeapBin, Bin, UserBlock</code> : 表示 LFH 分配的一块具体大小的内存。很多人称之为 <code>Bucket</code>，但是<code>_HEAP_BUCKET</code> 本身是一个 0x4 字节的数据结构，用来指定一个尺寸而不是用于内存容器。</p>
+<h3 id="重要结构" class="headerLink">
+    <a href="#%e9%87%8d%e8%a6%81%e7%bb%93%e6%9e%84" class="header-mark"></a>重要结构</h3><h4 id="_heapheapbase" class="headerLink">
+    <a href="#_heapheapbase" class="header-mark"></a>_HEAP(HeapBase)</h4><p>前面介绍过每个堆都是<code>_HEAP</code>结构进行描述的，而 Win7 针对<code>_HEAP</code>结构进行了一些更改，重要的更改点已经标出在结构体中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP
+</span></span><span class="line"><span class="cl">ntdll!_HEAP
+</span></span><span class="line"><span class="cl">   +0x000 Entry            : _HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x010 SegmentSignature : Uint4B
+</span></span><span class="line"><span class="cl">   +0x014 SegmentFlags     : Uint4B
+</span></span><span class="line"><span class="cl">   +0x018 SegmentListEntry : _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x028 Heap             : Ptr64 _HEAP
+</span></span><span class="line"><span class="cl">   +0x030 BaseAddress      : Ptr64 Void
+</span></span><span class="line"><span class="cl">   +0x038 NumberOfPages    : Uint4B
+</span></span><span class="line"><span class="cl">   +0x040 FirstEntry       : Ptr64 _HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x048 LastValidEntry   : Ptr64 _HEAP_ENTRY
+</span></span><span class="line"><span class="cl">   +0x050 NumberOfUnCommittedPages : Uint4B
+</span></span><span class="line"><span class="cl">   +0x054 NumberOfUnCommittedRanges : Uint4B
+</span></span><span class="line"><span class="cl">   +0x058 SegmentAllocatorBackTraceIndex : Uint2B
+</span></span><span class="line"><span class="cl">   +0x05a Reserved         : Uint2B
+</span></span><span class="line"><span class="cl">   +0x060 UCRSegmentList   : _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x070 Flags            : Uint4B
+</span></span><span class="line"><span class="cl">   +0x074 ForceFlags       : Uint4B
+</span></span><span class="line"><span class="cl">   +0x078 CompatibilityFlags : Uint4B
+</span></span><span class="line"><span class="cl">   +0x07c EncodeFlagMask   : Uint4B                    //用于判断堆 chunk 头部是否被编码。
+</span></span><span class="line"><span class="cl">   +0x080 Encoding         : _HEAP_ENTRY               //在异或 (XOR) 操作中用于编码 chunk 头，防止可预知的元数据被污染。
+</span></span><span class="line"><span class="cl">   +0x090 PointerKey       : Uint8B
+</span></span><span class="line"><span class="cl">   +0x098 Interceptor      : Uint4B
+</span></span><span class="line"><span class="cl">   +0x09c VirtualMemoryThreshold : Uint4B
+</span></span><span class="line"><span class="cl">   +0x0a0 Signature        : Uint4B
+</span></span><span class="line"><span class="cl">   +0x0a8 SegmentReserve   : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0b0 SegmentCommit    : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0b8 DeCommitFreeBlockThreshold : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0c0 DeCommitTotalFreeThreshold : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0c8 TotalFreeSize    : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0d0 MaximumAllocationSize : Uint8B
+</span></span><span class="line"><span class="cl">   +0x0d8 ProcessHeapsListIndex : Uint2B
+</span></span><span class="line"><span class="cl">   +0x0da HeaderValidateLength : Uint2B
+</span></span><span class="line"><span class="cl">   +0x0e0 HeaderValidateCopy : Ptr64 Void
+</span></span><span class="line"><span class="cl">   +0x0e8 NextAvailableTagIndex : Uint2B
+</span></span><span class="line"><span class="cl">   +0x0ea MaximumTagIndex  : Uint2B
+</span></span><span class="line"><span class="cl">   +0x0f0 TagEntries       : Ptr64 _HEAP_TAG_ENTRY
+</span></span><span class="line"><span class="cl">   +0x0f8 UCRList          : _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x108 AlignRound       : Uint8B
+</span></span><span class="line"><span class="cl">   +0x110 AlignMask        : Uint8B
+</span></span><span class="line"><span class="cl">   +0x118 VirtualAllocdBlocks : _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x128 SegmentList      : _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x138 AllocatorBackTraceIndex : Uint2B
+</span></span><span class="line"><span class="cl">   +0x13c NonDedicatedListLength : Uint4B
+</span></span><span class="line"><span class="cl">   +0x140 BlocksIndex      : Ptr64 Void
+</span></span><span class="line"><span class="cl">   +0x148 UCRIndex         : Ptr64 Void
+</span></span><span class="line"><span class="cl">   +0x150 PseudoTagEntries : Ptr64 _HEAP_PSEUDO_TAG_ENTRY
+</span></span><span class="line"><span class="cl">   +0x158 FreeLists        : _LIST_ENTRY              //指向堆上所有空闲 chunk 的指针。
+</span></span><span class="line"><span class="cl">   +0x168 LockVariable     : Ptr64 _HEAP_LOCK
+</span></span><span class="line"><span class="cl">   +0x170 CommitRoutine    : Ptr64     long 
+</span></span><span class="line"><span class="cl">   +0x178 FrontEndHeap     : Ptr64 Void               //指向关联的前端堆。
+</span></span><span class="line"><span class="cl">   +0x180 FrontHeapLockCount : Uint2B
+</span></span><span class="line"><span class="cl">   +0x182 FrontEndHeapType : UChar                    //1--&gt;Lookaside Lists 2--&gt;LFH Win7 实际上不支持 Lookaside Lists。
+</span></span><span class="line"><span class="cl">   +0x188 Counters         : _HEAP_COUNTERS
+</span></span><span class="line"><span class="cl">   +0x1f8 TuningParameters : _HEAP_TUNING_PARAMETERS
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="_heap_list_lookupheapbase-blocksindex" class="headerLink">
+    <a href="#_heap_list_lookupheapbase-blocksindex" class="header-mark"></a>_HEAP_LIST_LOOKUP(HeapBase-&gt;BlocksIndex)</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl">kd&gt; dt _HEAP_LIST_LOOKUP
+</span></span><span class="line"><span class="cl">ntdll!_HEAP_LIST_LOOKUP
+</span></span><span class="line"><span class="cl">   +0x000 ExtendedLookup   : Ptr64 _HEAP_LIST_LOOKUP    //
+</span></span><span class="line"><span class="cl">   +0x008 ArraySize        : Uint4B
+</span></span><span class="line"><span class="cl">   +0x00c ExtraItem        : Uint4B
+</span></span><span class="line"><span class="cl">   +0x010 ItemCount        : Uint4B
+</span></span><span class="line"><span class="cl">   +0x014 OutOfRangeItems  : Uint4B
+</span></span><span class="line"><span class="cl">   +0x018 BaseIndex        : Uint4B
+</span></span><span class="line"><span class="cl">   +0x020 ListHead         : Ptr64 _LIST_ENTRY
+</span></span><span class="line"><span class="cl">   +0x028 ListsInUseUlong  : Ptr64 Uint4B
+</span></span><span class="line"><span class="cl">   +0x030 ListHints        : Ptr64 Ptr64 _LIST_ENTRY
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="windows-10" class="headerLink">
+    <a href="#windows-10" class="header-mark"></a>Windows 10</h2><p>TODO: 未完成</p>
+<h2 id="参考" class="headerLink">
+    <a href="#%e5%8f%82%e8%80%83" class="header-mark"></a>参考</h2><p><a href="https://www.jianshu.com/p/a853040d2804" target="_blank" rel="noopener noreferrer">https://www.jianshu.com/p/a853040d2804</a></p>
+</div>
+
+        
+
+<div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-06-19</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span><a class="link-to-mardown" href=/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/index.txt target="_blank" rel="noopener noreferrer">阅读原始文档</a>
+                    </span></div>
+            <div class="post-info-share"><button title="分享到 Twitter" data-sharer="twitter" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制"><span class="fab fa-twitter fa-fw"></span></button><button title="分享到 Facebook" data-sharer="facebook" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/"><span class="fab fa-facebook-square fa-fw"></span></button><button title="分享到 WhatsApp" data-sharer="whatsapp" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制" data-web><span class="fab fa-whatsapp fa-fw"></span></button><button title="分享到 Line" data-sharer="line" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制"><span data-svg-src="/lib/simple-icons/icons/line.min.svg"></span></button><button title="分享到 微博" data-sharer="weibo" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制"><span class="fab fa-weibo fa-fw"></span></button><button title="分享到 Myspace" data-sharer="myspace" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制" data-description=""><span data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></span></button><button title="分享到 Blogger" data-sharer="blogger" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制" data-description=""><span class="fab fa-blogger fa-fw"></span></button><button title="分享到 Evernote" data-sharer="evernote" data-url="http://dre4merp.github.io/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3windows%E5%A0%86%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/" data-title="深入理解Windows堆管理机制"><span class="fab fa-evernote fa-fw"></span></button></div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cve-202226923%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E5%8F%8A%E5%88%86%E6%9E%90/" class="prev" rel="prev" title="CVE 2022–26923漏洞复现及分析"><i class="fas fa-angle-left fa-fw"></i>CVE 2022–26923漏洞复现及分析</a>
+            <a href="/explorer_dump_analysis/" class="next" rel="next" title="Explorer_dump_analysis">Explorer_dump_analysis<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">dre4merp is trying harder.</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/dre4merp" target="_blank" rel="noopener noreferrer">dre4merp</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/lightgallery/lightgallery.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":100,"findAllMatches":false,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":false,"ignoreLocation":false,"isCaseSensitive":false,"location":0,"maxResultLength":10,"minMatchCharLength":2,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":0.3,"type":"fuse","useExtendedSearch":false},"sharerjs":true,"table":{"sort":true}};</script><script type="text/javascript" src="/lib/tablesort/tablesort.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lightgallery.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-thumbnail.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-zoom.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-KDR7NTQEPH', { 'anonymize_ip': true });
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-KDR7NTQEPH" async></script></div>
+</body>
+
+</html>
