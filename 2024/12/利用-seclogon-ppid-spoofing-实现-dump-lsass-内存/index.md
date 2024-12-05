@@ -18,16 +18,16 @@ seclogon，叫做辅助登录服务，该服务是一个 RPC 服务。其主要�
 
 ``` mermaid
 graph TD
-    subgraph advapi32.dll;
-        A(CreateProcessWithTokenW) --> C(CreateProcessWithLogonCommonW);
-        B(CreateProcessWithLogonW) --> C;
-        C --> D(c_SeclCreateProcessWithLogonW);
-    end;
+    subgraph advapi32.dll
+        A(CreateProcessWithTokenW) --> C(CreateProcessWithLogonCommonW)
+        B(CreateProcessWithLogonW) --> C
+        C --> D(c_SeclCreateProcessWithLogonW)
+    end
 
-    subgraph seclogon.dll;
-        D --> E(SeclCreateProcessWithLogonW);
-        E --> F(SlrCreateProcessWithLogon);
-    end;
+    subgraph seclogon.dll
+        D --> E(SeclCreateProcessWithLogonW)
+        E --> F(SlrCreateProcessWithLogon)
+    end
 ```
 
 任何进程在创建时都需要明确其父进程，正常调用 `CreateProcessWithTokenW` 或 `CreateProcessWithLogonW` 创建新进程时默认父进程为当前进程，也就意味着 seclogon 服务中会获取到 **调用方**的 PID。通过逆向分析或查看 XP 源码可以发现  `SlrCreateProcessWithLogon` 在创建新进程前会尝试打开目标进程以确保传入的 PID 是合法的。
@@ -174,9 +174,9 @@ DuplicateHandle((HANDLE)leakedHandle, (HANDLE)-1, GetCurrentProcess(), &hLeakedH
 
 ``` mermaid
 graph TD
-		A(NtCreateProcessEx) --> B(PspCreateProcess);
-		B --> C(MmInitializeProcessAddressSpace);
-		C --> D(MiCloneProcessAddressSpace);
+        A(NtCreateProcessEx) --> B(PspCreateProcess)
+        B --> C(MmInitializeProcessAddressSpace)
+        C --> D(MiCloneProcessAddressSpace)
 
 ```
 
