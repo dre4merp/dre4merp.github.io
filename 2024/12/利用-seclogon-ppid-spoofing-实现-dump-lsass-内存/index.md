@@ -16,7 +16,7 @@ seclogon，叫做辅助登录服务，该服务是一个 RPC 服务。其主要�
 
 整体流程如下：
 
-``` mermaid
+```mermaid
 graph TD
     subgraph advapi32.dll
         A(CreateProcessWithTokenW) --> C(CreateProcessWithLogonCommonW)
@@ -172,7 +172,7 @@ DuplicateHandle((HANDLE)leakedHandle, (HANDLE)-1, GetCurrentProcess(), &hLeakedH
 
 查找其交叉引用可以发现如下调用链。这意味着我们可以通过调用 `NtCreateProcessEx` 创建一个内存完全 clone 自 lsass 的全新进程 (具体分析可以参考 [该文章](https://billdemirkapi.me/abusing-windows-implementation-of-fork-for-stealthy-memory-operations/))，之后可以通过对该进程进行内存 dump 间接获取到 lsass 的内存。
 
-``` mermaid
+```mermaid
 graph TD
 		A(NtCreateProcessEx) --> B(PspCreateProcess)
 		B --> C(MmInitializeProcessAddressSpace)
