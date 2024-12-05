@@ -16,18 +16,18 @@ seclogon，叫做辅助登录服务，该服务是一个 RPC 服务。其主要�
 
 整体流程如下：
 
-```mermaid
+``` mermaid
 graph TD
-    subgraph advapi32.dll
-        A(CreateProcessWithTokenW) --> C(CreateProcessWithLogonCommonW)
-        B(CreateProcessWithLogonW) --> C
-        C --> D(c_SeclCreateProcessWithLogonW)
-    end
+    subgraph advapi32.dll;
+        A(CreateProcessWithTokenW) --> C(CreateProcessWithLogonCommonW);
+        B(CreateProcessWithLogonW) --> C;
+        C --> D(c_SeclCreateProcessWithLogonW);
+    end;
 
-    subgraph seclogon.dll
-        D --> E(SeclCreateProcessWithLogonW)
-        E --> F(SlrCreateProcessWithLogon)
-    end
+    subgraph seclogon.dll;
+        D --> E(SeclCreateProcessWithLogonW);
+        E --> F(SlrCreateProcessWithLogon);
+    end;
 ```
 
 任何进程在创建时都需要明确其父进程，正常调用 `CreateProcessWithTokenW` 或 `CreateProcessWithLogonW` 创建新进程时默认父进程为当前进程，也就意味着 seclogon 服务中会获取到 **调用方**的 PID。通过逆向分析或查看 XP 源码可以发现  `SlrCreateProcessWithLogon` 在创建新进程前会尝试打开目标进程以确保传入的 PID 是合法的。
@@ -172,11 +172,11 @@ DuplicateHandle((HANDLE)leakedHandle, (HANDLE)-1, GetCurrentProcess(), &hLeakedH
 
 查找其交叉引用可以发现如下调用链。这意味着我们可以通过调用 `NtCreateProcessEx` 创建一个内存完全 clone 自 lsass 的全新进程 (具体分析可以参考 [该文章](https://billdemirkapi.me/abusing-windows-implementation-of-fork-for-stealthy-memory-operations/))，之后可以通过对该进程进行内存 dump 间接获取到 lsass 的内存。
 
-```mermaid
+``` mermaid
 graph TD
-		A(NtCreateProcessEx) --> B(PspCreateProcess)
-		B --> C(MmInitializeProcessAddressSpace)
-		C --> D(MiCloneProcessAddressSpace)
+		A(NtCreateProcessEx) --> B(PspCreateProcess);
+		B --> C(MmInitializeProcessAddressSpace);
+		C --> D(MiCloneProcessAddressSpace);
 
 ```
 
