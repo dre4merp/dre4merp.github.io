@@ -36,7 +36,7 @@
 
 如下图所示，堆管理器被结构化为 2 层：一个可选的前端层，以及核心堆层（也叫做后端堆层）。核心堆处理基本功能，并且是最为常见跨越用户与内核模式堆的实现。其核心功能包括段内块（blocks inside segments）的管理，段的管理，扩展堆的策略，提交和回收内存，以及大型块的管理（之后会具体分析）。
 
-![Heap-manager-layers](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Heap-manager-layers.jpg)
+![Heap-manager-layers](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Heap-manager-layers.jpg "Heap-manager-layers")
 
 ## 进程默认堆
 
