@@ -17,7 +17,7 @@
 
 下图展示了操作系统中不同层次的内存分配方法。
 
-![20220512112641](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220512112641.png)
+![20220512112641](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220512112641.png "20220512112641.png")
 
 ## 堆和栈的区别
 
@@ -71,7 +71,7 @@ kd> dd 0x7c99cfc0 l 10
 
 ### 堆的数据结构
 
-![20220512234513](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220512234513.png)
+![20220512234513](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220512234513.png "20220512234513.png")
 
 #### 堆段
 
@@ -170,7 +170,7 @@ Windows 中的空表其实是一个 128 项的指针数组，每项包含两个�
 
 而其中索引为 0 的项中保存的是所有超过 1024（包含）字节的空闲堆块，按照堆块大小升序排列。具体如下图所示。
 
-![20220414100256](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220414100256.png)
+![20220414100256](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220414100256.png "20220414100256.png")
 
 该结构指针位于`HEAP`的`+0x178`处，具体分析 Freelist 可以使用`!heap -f xxxxxxxx`命令
 
@@ -210,7 +210,7 @@ kd> dx -id 0,0,81cdd520 -r1 (*((ntdll!__unnamed *)0x90158))
 
 快表也有 128 条，组织结构与空表类似，只是其中的堆块按照单链表组织。快表总是被初始化为空，而且每条快表最多只有 4 个结点，故很快就会被填满。
 
-![20220414100848](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220414100848.png)
+![20220414100848](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220414100848.png "20220414100848.png")
 
 该结构指针位于`HEAP`的`+0x178`处，具体分析空表可以使用`!heap -f xxxxxxxx`命令
 
@@ -283,7 +283,7 @@ Entry     User      Heap      Segment       Size  PrevSize  Unused    Flags
 
 在用户申请分配某一大小的内存空间时，系统会首先判断申请的堆块是否属于巨块范畴，若是巨块，则采用虚分配，在漏洞利用中遇到较少，本文不予讨论。若申请大块，则首先考虑堆缓存进行分配，若分配不成功，则从 0 号空表中寻找最合适的空闲块进行分配。若申请小块，则首先查看对应大小的快表中有没有空闲的堆块，若无则查看对应大小的空表中有没有空闲的堆块，若无则通过空表位图查找更大的空表中有没有空闲的堆块进行切割分配，若无则采用堆缓存进行分配，若分配失败，则从 0 号空表中寻找最适合的空闲快进行分配，若依然失败，则会先进行内存紧缩后再尝试分配。堆块分配流程如下图所示。
 
-![HeapChunkAllocate](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/HeapChunkAllocate.png)
+![HeapChunkAllocate](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/HeapChunkAllocate.png "HeapChunkAllocate.png")
 
 #### 堆块释放
 

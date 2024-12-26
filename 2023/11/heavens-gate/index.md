@@ -24,7 +24,7 @@ WoW64（Windows 32-bit on Windows 64-bit）是 Windows 中的一个子系统�
 
 下图展示了 x64 Windows API 的调用流程。可以观察到，它简单地将 `NtOpenFile` 的 Service Index 放入 `eax` 寄存器中，通过 `KUSER_SHARED_DATA` 中的 `SystemCall` 判断使用何种系统中断方式，然后触发系统中断进入内核。
 
-![x64 Windows API 调用流程](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125220607.png)
+![x64 Windows API 调用流程](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125220607.png "20231125220607.png")
 
 ``` text
 0:007> dt _KUSER_SHARED_DATA SystemCall 7FFE0000
@@ -34,15 +34,15 @@ combase!_KUSER_SHARED_DATA
 
 在 WOW64 进程中，对于 `NtOpenFile` 的调用过程也类似。首先，同样将 Service Index 放入 `eax` 寄存器中，之后调用 `ntdll!Wow64SystemServiceCall` 函数。
 
-![WOW64 NtOpenFile 调用过程](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221312.png)
+![WOW64 NtOpenFile 调用过程](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221312.png "20231125221312.png")
 
 `ntdll!Wow64SystemServiceCall` 函数实际上只是通过一条 `jmp` 指令跳转到 `wow64cpu！Wow64Transition` 函数。
 
-![Wow64SystemServiceCall 跳转](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221338.png)
+![Wow64SystemServiceCall 跳转](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221338.png "20231125221338.png")
 
 下面是实际的 `wow64cpu！Wow64Transition` 函数的内容。关于为什么不使用 Windbg 的截图，是因为由于 CPU 的模式在这几条指令中会发生改变，导致无法正常解析出完全正确的汇编代码。
 
-![Wow64Transition 内容](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221437.png)
+![Wow64Transition 内容](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125221437.png "20231125221437.png")
 
 `jmp 33:wow64cpu+6009` 这句汇编使用的是 opcode 为 EA 的 far jmp，与我们通常见到的基于偏移的 jmp 指令（E9）有些不同。这个指令是一种长跳转，EA 后面跟随的第一个操作数是绝对地址。成功执行后，段寄存器 cs 将被写入第二个操作数，在这个例子中为 0x33。
 
@@ -52,7 +52,7 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 - 0x33 - 当前状态是原生 64 位 Thread 状态（运行在原生 64 位系统中）
 - 0x1B - 当前状态是原生 32 位 Thread 状态（运行在原生 32 位系统中）
 
-![Far jump intel](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125223954.png)
+![Far jump intel](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231125223954.png "20231125223954.png")
 
 随后，CPU 识别到 cs 为 0x33，之后的代码都会以 x64 的模式运行，因此才会出现 **r15** 寄存器和 qword 的关键字。
 
@@ -62,9 +62,9 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 
 而 `BTCpuSimulate` 实际上是一个大的 while 循环，循环执行 x86 代码，当需要调用 API 函数 (系统中断) 时，由于系统只支持 x64 的函数，就需要切换回 x64 模式并再执行后返回。从 IDA 和 XP leak code 我们都可以清楚的看出这个逻辑。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126164240.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126164240.png "20231126164240.png")
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126164639.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126164639.png "20231126164639.png")
 
 下面是 `BTCpuSimulate` 中 `RunSimulatedCode` 函数入口点的代码片段，执行的重点操作如下：
 
@@ -74,7 +74,7 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 
 分析到现在我们就得到了上面关注的 r15 寄存器的值。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126162403.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126162403.png "20231126162403.png")
 
 分析 `TurboThunkDispatch` 列表，只有两个函数需要注意:
 
@@ -83,7 +83,7 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 
 指令 `jmp [r15 + 0xF8]` 相当于 C 代码 `jmp TurboThunkDispatch[0xF8 / sizeof(uint64_t)]`。查看此索引处的函数指针，我们可以看到我们位于函数 `wow64cpu!CpupReturnFromSimulatedCode`。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126165029.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126165029.png "20231126165029.png")
 
 ### CpupReturnFromSimulatedCode
 
@@ -98,37 +98,37 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 
 接下来，将 32 位运行所必需的几个关键参数（如可能受到文本操作系列指令影响的寄存器 `edi`、`esi`，与栈帧相关的 `ebp`，运算旗标记录 `r8d` 等）一并写入 `r13` 指向的 Thread 快照纪录。这样就完成了对 32 位状态的快照备份，可以安心跳转到 `TurboDispatchJumpAddressStart` 函数中进行下一步操作。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126172712.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126172712.png "20231126172712.png")
 
 而 `TurboDispatchJumpAddressStart` 只是针对不同的 API 进行分发而已。eax 中保存的是 API 的 Service Index，计算方式是将 index 右移 16 位。所以其实 API 的 index 中高两位就是其在 TurboThunkDispatch 中的索引，而大部分的 API 的高两位都是 0，所以大部分都会执行 `TurboDispatchJumpAddressEnd`.
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126173807.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126173807.png "20231126173807.png")
 
 ### TurboDispatchJumpAddressEnd
 
 `TurboDispatchJumpAddressEnd` 调用 `Wow64SystemServiceEx`,一次传入 API 的 index 和参数，调用完成后将结果保存在 r13 的 context 中。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126174306.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126174306.png "20231126174306.png")
 
 之后便是复原刚才保存的各个寄存器的内容，最后通过 jmp far 切换回 x86 模式并继续执行。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126174319.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126174319.png "20231126174319.png")
 
 ### Wow64SystemServiceEx
 
 上面说过，该函数的第一参数是 API 的 index，而这个 index 其实是一个 `WOW64_SYSTEM_SERVICE` 结构，其大小为 16 位。其中低 12 位表示函数识别码，而较高的 4 位表示系统函数表的辨识码。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126175257.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126175257.png "20231126175257.png")
 
 这是个二维数组，其位于 `wow64.dll` 中，其中保存的是 wh 开头的 Nt 函数。执行 Nt 函数时，会调用对应的 whNt 函数，由其来调用对应的 64 位 Nt 函数。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126180617.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126180617.png "20231126180617.png")
 
 而 `Wow64SystemServiceEx` 的作用就是利用传入的 API index 进行分发。
 
-![aaaddress1's fake code](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126222109.png)
+![aaaddress1's fake code](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126222109.png "20231126222109.png")
 
-![XP leaked Wow64SystemService](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126180815.png)
+![XP leaked Wow64SystemService](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126180815.png "20231126180815.png")
 
 以上，便是对于 WoW64 实现原理的分析，之后我们来进入关于 Heaven’s Gate 的分析。
 
@@ -136,11 +136,11 @@ cs 的不同值会影响 Intel 使用不同指令集进行解析：
 
 现在我们已经清楚了 WoW64 进程的工作流程。在正常情况下，其调用应如下图一样。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126222720.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126222720.png "20231126222720.png")
 
 而某些安全软件的主动防御等监控功能会 Hook 掉一些恶意软件常用的 API 函数。Hook 后的流程如下图一样。而天堂之门技术的核心就是绕过 WoW64 子系统，直接在 WoW64 进程内调用 API 函数，这样就可以 ByPass 掉一些安全软件的防护措施。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126223113.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/20231126223113.png "20231126223113.png")
 
 而 WoW64 进程中直接调用 x64 的 API 函数也存在两种不同的方式：
 

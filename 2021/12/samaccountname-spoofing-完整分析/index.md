@@ -28,7 +28,7 @@ CVE-2021-42287：利用上述漏洞进行欺骗，请求到DC的TGT后，修改�
 
 使用SysinternalsSuite中的ADExplorer64工具查看域内的所有机器账户  
 
-![ADExplorer](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/ADExplorer.png)
+![ADExplorer](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/ADExplorer.png "ADExplorer.png")
 
 ~~上图显示了Active Directory中的完整目录树，其中需要注意的是Computers和Domain Controllers这两项在目录树中的相对位置，正是由于Computer在前，在遍历目录树时才会先获得新建的DC同名账户。~~  
 从上图中可以很明确的看到域控的机器名为`WINSRVSERVER$`，之后会使用`WINSRVSERVER`作为机器账户名进行欺骗。
@@ -630,7 +630,7 @@ kd> dx -id 0,0,89de1678 -r1 (*((KDCSVC!_USER_ALL_INFORMATION *)0x1602e0))
 而上一步中我们申请的TGT中的PAC，是 不在下图中的Service1向KDC认证的过程 中颁发的PAC  
 明白了这点也就明白了为什么PAC会被替换  
 
-![Server-for-User-to-Self (S4U2self)](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/S4U2self.png)
+![Server-for-User-to-Self (S4U2self)](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/S4U2self.png "S4U2self.png")
 
 以下堆栈及函数完成了生成ST并向其中添加了用户PAC
 

@@ -7,7 +7,7 @@
 
 Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话中Kerberos是守护地狱之门的一条三头神犬，而这三个头分别代表着协议的三个角色，如下图所示它们分别是：  
 
-![KDC架构](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/KDC架构.png)
+![KDC架构](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/KDC架构.png "KDC架构.png")
 
 1. 访问服务的Client
 2. 提供服务的Server
@@ -27,7 +27,7 @@ Kerberos认证主要通过三个子协议来完成，它们分别为：
 
 具体流程如下图所示：
 
-![Kerberos流程图](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Kerberos流程图.png)
+![Kerberos流程图](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Kerberos流程图.png "Kerberos流程图.png")
 
 1. **AS_REQ**: Client向KDC发起AS_REQ,请求凭据是Client hash加密的时间戳
 2. **AS_REP**: KDC使用Client hash进行解密，如果结果正确就返回用krbtgt hash加密的TGT票据，TGT里面包含PAC,PAC包含Client的sid，Client所在的组。
@@ -61,19 +61,19 @@ AS_REQ: Client向KDC发起AS_REQ,请求凭据是Client hash加密的时间戳，
 
 调用堆栈如下：
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo1.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo1.png "kerberos-debuginfo1.png")
 
 其中的`Logon Session`中存在当前账户的`NTLMHash`，之后便是用这个Hash去加密时间戳
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo2.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo2.png "kerberos-debuginfo2.png")
 
 对KDC请求的服务名称为`krbtgt`
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo3.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo3.png "kerberos-debuginfo3.png")
 
 之后会在`KerbBuildPreAuthData`中生成`PreAuthData`的认证消息，其中便包括使用用户Hash加密的时间戳
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo4.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo4.png "kerberos-debuginfo4.png")
 
 ``` cpp
 KerbErr = KerbEncryptDataEx(
@@ -91,18 +91,18 @@ KerbErr = KerbEncryptDataEx(
 `UserKey`为用户Hash
 `EncryptedData.cipher_text`为加密后的数据
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo5.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo5.png "kerberos-debuginfo5.png")
 
 图中标记分别为用户Hash和加密后的时间戳
 最后便是将认证包打包发送
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo6.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo6.png "kerberos-debuginfo6.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo7.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo7.png "kerberos-debuginfo7.png")
 
 通过Wireshark抓包查看padata与分析一致
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo8.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo8.png "kerberos-debuginfo8.png")
 
 ### AS_REP
 
@@ -122,9 +122,9 @@ KerbErr = KdcVerifyEncryptedTimeStamp(
             );
 ```
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo9.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo9.png "kerberos-debuginfo9.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo10.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo10.png "kerberos-debuginfo10.png")
 
 之后会通过PacOptions确定是否需要建立PAC  
 
@@ -133,13 +133,13 @@ KerbErr = KdcVerifyEncryptedTimeStamp(
 其中key为Client与KDC通信所需要的Logon Session Key
 authorization_data为PAC，会在下一步生成并填入其中
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo11.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo11.png "kerberos-debuginfo11.png")
 
 之后会根据之前保存的标志确定是否构建PAC，会在KdcGetPacAuthData中构建PAC并对其进行签名后加入到上方TGT中的authorization_data中
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo12.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo12.png "kerberos-debuginfo12.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo13.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo13.png "kerberos-debuginfo13.png")
 
 其实质上应该是`_KERB_VALIDATION_INFO`结构体，其中包括了登陆用户的一些信息。
 
@@ -186,15 +186,15 @@ authorization_data为PAC，会在下一步生成并填入其中
 创建Reply消息，ReplyBody中包含最重要的就是Logon Session Key,该结构会使用Client Hash加密；明文TGT使用krbtgt hash进行加密  
 加密后的ReplyBody
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo14.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo14.png "kerberos-debuginfo14.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo15.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo15.png "kerberos-debuginfo15.png")
 
 加密后的TGT
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo16.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo16.png "kerberos-debuginfo16.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo17.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo17.png "kerberos-debuginfo17.png")
 
 ### TGS_REQ
 
@@ -205,23 +205,23 @@ Windows将这两步融合在了一起，具体信息可以Wireshark抓包查看
 
 Client会在KerbMakeKdcCall中接收到KDC返回的AS_REP消息
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo18.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo18.png "kerberos-debuginfo18.png")
 
 解包后内容，其中ticket就是加密后的TGT，encrypted_part为加密后的ReplyBody
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo19.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo19.png "kerberos-debuginfo19.png")
 
 使用ClientKey对ReplyBody进行解密，获得Logon Session Key
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo20.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo20.png "kerberos-debuginfo20.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo21.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo21.png "kerberos-debuginfo21.png")
 
 TGT由于是被Krbtgt hash加密的，并不能解密获得明文，而是使用它来认证自身的身份。其会被保存在本地，通过KerbCreateTicketCacheEntry建立一个新的TicketCacheEntry进行保存
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo22.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo22.png "kerberos-debuginfo22.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo23.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo23.png "kerberos-debuginfo23.png")
 
 至此认证过程完全完成，下一步将向KDC请求ST（Service Ticket）
 
@@ -229,30 +229,30 @@ TGT由于是被Krbtgt hash加密的，并不能解密获得明文，而是使用
 Client1向KDC请求某一个共享文件夹的访问权限
 命令：`dir \\KDCComputerName\C$`
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo24.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo24.png "kerberos-debuginfo24.png")
 
 Client会在KerbGetServiceTicket中向KDC发起申请ST的TGS请求
 
 首先会通过KerbGetTgtForService进行身份认证，即上述两次通信过程，获得的TGT储存在第7参数TicketGrantingTicket中
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo25.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo25.png "kerberos-debuginfo25.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo26.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo26.png "kerberos-debuginfo26.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo27.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo27.png "kerberos-debuginfo27.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo28.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo28.png "kerberos-debuginfo28.png")
 
 之后使用KerbGetTgsTicket这个函数，通过TGT申请TGS
 
 创建RequestBody，其中主要信息为我们所申请的服务名称
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo29.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo29.png "kerberos-debuginfo29.png")
 
 由于我们要证明自己确实是向KDC申请TGT的机器，所以必须将该结构使用只有KDC与自己两个人知道的Key进行签名，即是用Logon Session Key进行签名
 所以便会调用KerbComputeTgsChecksum进行签名
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo30.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo30.png "kerberos-debuginfo30.png")
 
 Windows上的TgsRequest的TGT和身份认证部分都由Aprequest结果保存
 
@@ -260,20 +260,20 @@ Windows上的TgsRequest的TGT和身份认证部分都由Aprequest结果保存
 通过KerbCreateAuthenticator创建Authenticator
 将上面的checksum放入该结构体中，之后使用Logon Session Key进行加密
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo31.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo31.png "kerberos-debuginfo31.png")
 
 至此ApRequest创建完成，其中包含
 Krbtgt Hash 加密的TGT
 Logon Session 加密的 Authenticator
 最后在kerberos!KerbMakeSocketCall中发送
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo32.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo32.png "kerberos-debuginfo32.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo33.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo33.png "kerberos-debuginfo33.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo34.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo34.png "kerberos-debuginfo34.png")
 
-![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo35.png)
+![kerberos-debuginfo1](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo35.png "kerberos-debuginfo35.png")
 
 ### TGS_REP
 
@@ -282,44 +282,44 @@ Logon Session 加密的 Authenticator
 KDC在HandleTGSRequest中处理TGS_REQ消息
 首先，通过krbtgt hash解密查看票据是否合法
 
-![kerberos-debuginfo36](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo36.png)
+![kerberos-debuginfo36](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo36.png "kerberos-debuginfo36.png")
 
 之后，计算检查CheckSum中的签名
 
-![kerberos-debuginfo37](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo37.png)
+![kerberos-debuginfo37](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo37.png "kerberos-debuginfo37.png")
 
 KDC在I_GetTGSTicket中构造TGS
 
-![kerberos-debuginfo38](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo38.png)
+![kerberos-debuginfo38](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo38.png "kerberos-debuginfo38.png")
 
 通过KdcGetTicketInfo函数获取构建Ticket需要的信息
 
-![kerberos-debuginfo39](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo39.png)
+![kerberos-debuginfo39](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo39.png "kerberos-debuginfo39.png")
 
-![kerberos-debuginfo40](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo40.png)
+![kerberos-debuginfo40](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo40.png "kerberos-debuginfo40.png")
 
 构建TGSTicket
 
-![kerberos-debuginfo41](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo41.png)
+![kerberos-debuginfo41](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo41.png "kerberos-debuginfo41.png")
 
 Ticket内容如下
 
-![kerberos-debuginfo42](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo42.png)
+![kerberos-debuginfo42](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo42.png "kerberos-debuginfo42.png")
 
 向其中添加对于客户端的认证信息
 包括证书的有效时间和认证信息
 
-![kerberos-debuginfo43](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo43.png)
+![kerberos-debuginfo43](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo43.png "kerberos-debuginfo43.png")
 
 最后申请Reply结构并进行填充，和之前一样进行打包加密
 Ticket为用ServerHash加密的TGSTicket
 enc-part为使用Logon Session Key加密的认证消息，包含Client和Server建立会话的Session Key
 
-![kerberos-debuginfo44](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo44.png)
+![kerberos-debuginfo44](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo44.png "kerberos-debuginfo44.png")
 
-![kerberos-debuginfo45](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo45.png)
+![kerberos-debuginfo45](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo45.png "kerberos-debuginfo45.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo46.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo46.png "kerberos-debuginfo46.png")
 
 ### AP_REQ & AS_REP
 
@@ -331,7 +331,7 @@ enc-part为使用Logon Session Key加密的认证消息，包含Client和Server�
 
 #### 基本流程
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo47.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo47.png "kerberos-debuginfo47.png")
 
 上图描述了以下协议步骤：
 
@@ -353,62 +353,62 @@ enc-part为使用Logon Session Key加密的认证消息，包含Client和Server�
 
 #### 配置
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo48.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo48.png "kerberos-debuginfo48.png")
 
 每个账户都存在一个属性值UserAccountControl，其值可以决定Kerberos委派的性质
 具体的值及其对应含义请参考：<https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties>
 使用SysinternalsSuite中的ADExplorer工具可以很方便的查看AD域中的所有属性
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo49.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo49.png "kerberos-debuginfo49.png")
 
 和非约束委派相关的属性为0x80000
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo50.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo50.png "kerberos-debuginfo50.png")
 
 #### 调试分析
 
 正常情况下一次请求只会出现一次TGS_REQ
 但是在开启非约束委派的情况下会发起两次
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo51.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo51.png "kerberos-debuginfo51.png")
 
 其中途中标号为9的请求对应上述描述中的第5步，为客户端请求需要的服务的ST的过程
 所以kdc-options中的forwarded为0
 sname为cifs
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo53.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo53.png "kerberos-debuginfo53.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo54.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo54.png "kerberos-debuginfo54.png")
 
 标号为17的请求为对于TGT2（forwarded TGT）的请求，对应上述描述中的第3步
 所以kdc-options中的forwarded为1
 sname为krbtgt
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo55.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo55.png "kerberos-debuginfo55.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo56.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo56.png "kerberos-debuginfo56.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo57.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo57.png "kerberos-debuginfo57.png")
 
 TGT2--- TicketGrantingTicket
 TGT2的SessionKey---TicketGrantingTicket. SessionKey
 TGT1--- TicketGrantingTicket.Ticket
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo58.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo58.png "kerberos-debuginfo58.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo59.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo59.png "kerberos-debuginfo59.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo60.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo60.png "kerberos-debuginfo60.png")
 
 KerbBuildGssChecksum的第三参数Ticket即为ServiceTicket
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo61.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo61.png "kerberos-debuginfo61.png")
 
 之后会将该结果后打包加密后放入CheckSumBody->DelegationInfo中
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo62.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo62.png "kerberos-debuginfo62.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo63.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo63.png "kerberos-debuginfo63.png")
 
 ### 约束委派
 
@@ -416,7 +416,7 @@ KerbBuildGssChecksum的第三参数Ticket即为ServiceTicket
 
 约束委派在Kerberos中User不会直接发送TGT给服务，而是对发送给service1的认证信息做了限制，不允许service1代表User使用这个TGT去访问其他服务。其中包括一组名为S4U2Self（Service for User to Self）和S4U2Proxy（Service for User to Proxy）的Kerberos协议扩展。
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo64.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo64.png "kerberos-debuginfo64.png")
 
 请求过程如下：
 
@@ -444,32 +444,32 @@ B.Service1有从用户到Service1的forwardableST（可转发ST）。个人认�
 
 Windows Server 2003 已经支持约束委派，但是并没有可视化的设置界面，需要通过ADExplorer工具修改属性值，开启约束委派。
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo65.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo65.png "kerberos-debuginfo65.png")
 
 约束委派对应值为
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo66.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo66.png "kerberos-debuginfo66.png")
 
 #### 调试分析
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo67.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo67.png "kerberos-debuginfo67.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo68.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo68.png "kerberos-debuginfo68.png")
 
 步骤2中S4U2Self是通过KerbGetS4USelfServiceTicket函数完成。
 首先获取Service自身的TGT，进行身份认证
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo69.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo69.png "kerberos-debuginfo69.png")
 
 其次将“冒充”客户的身份去申请针对自身的TGS
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo70.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo70.png "kerberos-debuginfo70.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo71.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo71.png "kerberos-debuginfo71.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo72.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo72.png "kerberos-debuginfo72.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo73.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo73.png "kerberos-debuginfo73.png")
 
  步骤5中的S4U2Proxy在KerbGetServiceTicketByS4UProxy中完成
 与以往不同的是这次会存在一个AdditionTicket，其中是上一步返回的TGS
@@ -477,17 +477,17 @@ Windows Server 2003 已经支持约束委派，但是并没有可视化的设置
 其中最重要的一步便是通过KerbCheckA2D2Attribute对委派进行限制，只有
 msDS-AllowedToDelegateto中存在的项才允许访问 返回TGS
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo75.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo75.png "kerberos-debuginfo75.png")
 
 检查通过后KdcUnpackAdditionalTickets会返回S4UTicketInfo
 内容如下
- ![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo76.png)
+ ![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo76.png "kerberos-debuginfo76.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo77.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo77.png "kerberos-debuginfo77.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo78.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo78.png "kerberos-debuginfo78.png")
 
-![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo79.png)
+![kerberos-debuginfo46](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/kerberos-debuginfo79.png "kerberos-debuginfo79.png")
 
 之后便是正常的返回TGS的流程
 

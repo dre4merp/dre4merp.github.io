@@ -35,7 +35,8 @@
     <a href="#%e5%89%8d%e7%bd%ae%e7%9f%a5%e8%af%86" class="header-mark"></a>前置知识</h2><h3 id="api网关" class="headerLink">
     <a href="#api%e7%bd%91%e5%85%b3" class="header-mark"></a>API网关</h3><p>在微服务架构中，由于一个系统由多个服务组成，客户端不再直接请求服务，而是添加了API网关的概念。客户端直接向API网关发起请求，由API网关对请求进行处理，并分发给不同的服务。</p>
 <p>具体区别如下图：</p>
-<p><img class="tw-inline" loading="lazy" src=https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&Direct.png   alt="Gateway&amp;Direct"  ></p>
+<p><figure><a class="lightgallery" href="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&amp;Direct.png" title="Gateway&amp;Direct" data-thumbnail="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&amp;Direct.png" data-sub-html="<h2>Gateway&amp;Direct.png</h2><p>Gateway&amp;Direct</p>"><img  loading="lazy" src=https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&Direct.png   alt="Gateway&amp;Direct"  ></a><figcaption class="image-caption">Gateway&Direct.png</figcaption>
+</figure></p>
 <h3 id="spring-cloud-gateway" class="headerLink">
     <a href="#spring-cloud-gateway" class="header-mark"></a>Spring Cloud Gateway</h3><h4 id="概念" class="headerLink">
     <a href="#%e6%a6%82%e5%bf%b5" class="header-mark"></a>概念</h4><p>Spring Cloud Gateway 是 Spring Cloud 团队基于 Spring 5.0、Spring Boot 2.0 和 Project Reactor 等技术开发的高性能 API 网关组件。</p>

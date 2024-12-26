@@ -13,7 +13,7 @@
 
 > !process 0 0 explorer.exe
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109112441.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109112441.png "Pasted%20image%2020231109112441.png")
 
 发现系统存在两个 explorer.exe，其中 07ac 的 HandleCount 更多一些，明显是实际工作的进程
 
@@ -31,11 +31,11 @@
 
 > !thread ffffcf0f70d8d080
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124110.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124110.png "Pasted%20image%2020231109124110.png")
 
 windbg 有针对 rpc/alpc 的扩展，可以直接查看 rpc 消息并定位到对应的 ServerThread
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124234.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124234.png "Pasted%20image%2020231109124234.png")
 
 ### 分析 COM 服务进程
 
@@ -45,33 +45,33 @@ windbg 有针对 rpc/alpc 的扩展，可以直接查看 rpc 消息并定位到�
 > .thread ffffcf0f71a6a2c0 \
 > !thread ffffcf0f`71a6a2c0
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124620.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124620.png "Pasted%20image%2020231109124620.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124726.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109124726.png "Pasted%20image%2020231109124726.png")
 
 通过 KeWaitForMultipleObjects 的第一参数和第二参数可以看出其正在等待两个事件。
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109125454.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109125454.png "Pasted%20image%2020231109125454.png")
 
 等待事件的原因是在发起 COM 请求，所以我们需要找到其对应的服务进程和线程来确定为什么 COM 请求被卡住了
 
 查看 COM 请求的发起函数 `combase!ThreadSendReceive` 发现符号非常全，甚至包括其参数的类符号，看一下参数中是否有对应的 server 相关信息
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109130449.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109130449.png "Pasted%20image%2020231109130449.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109130519.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109130519.png "Pasted%20image%2020231109130519.png")
 
 发现存在 pid 和 tid，那么就可以通过这两个成员获取服务进程。接下来就是找到这个参数在内存中保存的位置。因为目标机器是 x64 的，这个进程也是 x64 的进程，调用约定是 fastcall，参数的传递用的是寄存器。那么就需要查看对应代码，找到参数 rcx、rdx 在被赋值时被 push 保存到栈上的位置。
 
 通过查看 `combase!ThreadSendReceive` 被调用时的参数赋值，可以看出目标第二参数 rdx，在赋值给 rdx 之前是由 rdi 进行保存的。而 rdi 寄存器在会被其在初始化函数时保存在栈上，由此可以找到第二参数
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131024.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131024.png "Pasted%20image%2020231109131024.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131155.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131155.png "Pasted%20image%2020231109131155.png")
 
 下图是 `combase!ThreadSendReceive` 的栈顶位置 (rsp)
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131343.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109131343.png "Pasted%20image%2020231109131343.png")
 
 回溯堆栈就需要将函数初始化时的操作进行逆置，也就是
 
@@ -88,25 +88,25 @@ push    r15
 lea     rbp, [rsp-4B0h]
 ```
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109132839.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109132839.png "Pasted%20image%2020231109132839.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109133038.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109133038.png "Pasted%20image%2020231109133038.png")
 
 至此，我们找到了 COM 的服务进程，需要继续切换进 468 进程中查看问题
 
 ### 分析 RPC 消息
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109133135.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109133135.png "Pasted%20image%2020231109133135.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109135919.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109135919.png "Pasted%20image%2020231109135919.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109135936.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109135936.png "Pasted%20image%2020231109135936.png")
 
 发现了两个正在等待 alpc reply 的线程，且 port 都属于 ffffcf0f7000d540 进程，可见是该进程内出现了卡死。重复上面 alpc 相关的分析过程，查看 message 和 ServerThread
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109140447.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109140447.png "Pasted%20image%2020231109140447.png")
 
-![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109140516.png)
+![image](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/Pasted%20image%2020231109140516.png "Pasted%20image%2020231109140516.png")
 
 另一个线程是相同的堆栈，可以看出是 360FsFlt 驱动向应用层发消息时卡住了，终于就要找到问题了。接下来就是要找到这个 Filter 对应的应用层进程了。
 

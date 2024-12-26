@@ -8,11 +8,11 @@
 
 seclogon，叫做辅助登录服务，该服务是一个 RPC 服务。其主要功能为模拟特定用户登录并创建进程，通过观察其 idl 文件可以发现其主要实现了 `SeclCreateProcessWithLogonW` 函数。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031720386.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031720386.png "202412031720386.png")
 
 每当在程序中调用由 advapi32.dll 导出的 [CreateProcessWithTokenW](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw) 或 [CreateProcessWithLogonW](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithlogonw) 的时候都会触发 RPC 调用，从而进入 seclogon 服务中。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031719939.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031719939.png "202412031719939.png")
 
 整体流程如下：
 
@@ -32,23 +32,23 @@ graph TD
 
 任何进程在创建时都需要明确其父进程，正常调用 `CreateProcessWithTokenW` 或 `CreateProcessWithLogonW` 创建新进程时默认父进程为当前进程，也就意味着 seclogon 服务中会获取到 **调用方**的 PID。通过逆向分析或查看 XP 源码可以发现  `SlrCreateProcessWithLogon` 在创建新进程前会尝试打开目标进程以确保传入的 PID 是合法的。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031720692.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031720692.png "202412031720692.png")
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031825689.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412031825689.png "202412031825689.png")
 
 其中打开的进程句柄就是属于 **调用方**的进程句柄，该句柄会用于之后的一系列操作，以创建新请求的进程。例如，之后的更改新进程的父 PID，更新进程属性，以便将其与**调用方**匹配后再通过 `CreateProcessAsUserW` 进行实际进程创建。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041238367.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041238367.png "202412041238367.png")
 
 ### PPID Spoofing
 
 我们可以观察到 seclogon 在确定**调用方**的时候是通过 `psli->dwProcessId` 值获取的进程 ID，那么这个值是从哪里来的呢。分析调用调用链上的所有函数，最终找到其是在 `CreateProcessWithLogonCommonW` 中通过 `GetCurrentProcessId` 进行的赋值。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041420038.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041420038.png "202412041420038.png")
 
 而 `GetCurrentProcessId` 不必多说，其是在当前线程 TEB 中获取进程 ID 的。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041422718.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041422718.png "202412041422718.png")
 
 这也就意味 seclogon 中的 `OpenProcess` 操作的输入参数 PID 是完全可控的，只需要修改 TEB 中的对应内存即可以完成父进程欺骗。
 
@@ -94,11 +94,11 @@ void SpoofPidTeb(DWORD spoofedPid, PDWORD originalPid, PDWORD originalTid) {
 
 但是，`CloseHandle` 调用之前会调用 [CreateProcessAsUser](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasuserw)
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041550791.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041550791.png "202412041550791.png")
 
 `CreateProcessAsUser` 允许在指定令牌表示的用户的安全上下文中创建新进程。执行一些准备步骤后，它会从 kernel32.dll 调用 `CreateProcessInternalW`，该函数会在进入内核 `NtCreateUserProcess` 之前做好所有的准备工作。在内核中执行的操作之一是打开提供的文件路径并创建 section 对象。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041551046.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041551046.png "202412041551046.png")
 
 谁说 EXE 一定要是一个 EXE 呢 😆
 
@@ -168,7 +168,7 @@ DuplicateHandle((HANDLE)leakedHandle, (HANDLE)-1, GetCurrentProcess(), &hLeakedH
 
 内核中存在一个函数 `MiCloneProcessAddressSpace`,其功能为遍历所有 PTE 并 clone 内存。
 
-![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041659470.png)
+![image.png](https://dre4merp-cloud-images.oss-cn-beijing.aliyuncs.com/202412041659470.png "202412041659470.png")
 
 查找其交叉引用可以发现如下调用链。这意味着我们可以通过调用 `NtCreateProcessEx` 创建一个内存完全 clone 自 lsass 的全新进程 (具体分析可以参考 [该文章](https://billdemirkapi.me/abusing-windows-implementation-of-fork-for-stealthy-memory-operations/))，之后可以通过对该进程进行内存 dump 间接获取到 lsass 的内存。
 

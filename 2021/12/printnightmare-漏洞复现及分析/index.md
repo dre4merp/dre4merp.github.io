@@ -13,13 +13,13 @@
 
 `CVE-2021-1675`的漏洞点位于`RpcAddPrinterDriverEx`中,`CVE-2021-34527`的漏洞点位于`RpcAsyncAddPrinterDriver`中。系统在对上述两个函数进行相关处理后，都调用了`YAddPrinterDriverEx`函数，但是这个过程并没有对参数`dwFileCopyFlags`进行条件判断，所以可以添加一个标志`APD_INSTALL_WARNED_DRIVER`，使得添加打印机驱动时，以system权限加载恶意DLL。
 
-![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.016](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.016.png)
+![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.016](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.016.png "Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.016.png")
 
 Mimikatz中针对PrintNightmare攻击的实现代码
 
-![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.002](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.002.png)
-![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.003](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.003.png)
-![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.004](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.004.png)
+![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.002](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.002.png "Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.002.png")
+![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.003](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.003.png "Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.003.png")
+![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.004](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.004.png "Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.004.png")
 
 两个漏洞分别的漏洞点
 
@@ -29,7 +29,7 @@ Mimikatz中针对PrintNightmare攻击的实现代码
 
 通过`YAddPrinterDriverEx`添加打印机驱动时，Windows原本会在`SplAddPrinterDriverEx`中通过`ValidateObjectAccess`对当前用户权限进行校验，如果权限校验失败将无法加载驱动。但是由于添加了标志`APD_INSTALL_WARNED_DRIVER(0x8000)`，所以成功越过了对于权限的检查。
 
-![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.005](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.005.png)
+![Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.005](https://github.com/dre4merp/Drawing-bed/blob/main/images/Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.005.png "Aspose.Words.2a55de83-1c35-49eb-98b2-393b538b46b8.005.png")
 
 `YAddPrinterDriverEx`本地的内部实现位于`localspl.dll`中的`InternalAddPrinterDriverEx`函数，添加驱动的过程如下：
 

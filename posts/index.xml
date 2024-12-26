@@ -35,7 +35,8 @@
     <a href="#%e5%89%8d%e7%bd%ae%e7%9f%a5%e8%af%86" class="header-mark"></a>前置知识</h2><h3 id="api网关" class="headerLink">
     <a href="#api%e7%bd%91%e5%85%b3" class="header-mark"></a>API网关</h3><p>在微服务架构中，由于一个系统由多个服务组成，客户端不再直接请求服务，而是添加了API网关的概念。客户端直接向API网关发起请求，由API网关对请求进行处理，并分发给不同的服务。</p>
 <p>具体区别如下图：</p>
-<p><img class="tw-inline" loading="lazy" src=https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&Direct.png   alt="Gateway&amp;Direct"  ></p>
+<p><figure><a class="lightgallery" href="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&amp;Direct.png" title="Gateway&amp;Direct" data-thumbnail="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&amp;Direct.png" data-sub-html="<h2>Gateway&amp;Direct.png</h2><p>Gateway&amp;Direct</p>"><img  loading="lazy" src=https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/Gateway&Direct.png   alt="Gateway&amp;Direct"  ></a><figcaption class="image-caption">Gateway&Direct.png</figcaption>
+</figure></p>
 <h3 id="spring-cloud-gateway" class="headerLink">
     <a href="#spring-cloud-gateway" class="header-mark"></a>Spring Cloud Gateway</h3><h4 id="概念" class="headerLink">
     <a href="#%e6%a6%82%e5%bf%b5" class="header-mark"></a>概念</h4><p>Spring Cloud Gateway 是 Spring Cloud 团队基于 Spring 5.0、Spring Boot 2.0 和 Project Reactor 等技术开发的高性能 API 网关组件。</p>
@@ -46,4 +47,4 @@
 但是AD域并没有对其进行强校验。通过建立与域控同名却不以$结尾的机器账户，即<code>DC</code>，对域控进行欺骗。</p>]]></description></item><item><title>Kerberos 学习笔记</title><link>http://dre4merp.github.io/2021/12/kerberos-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link><pubDate>Thu, 30 Dec 2021 23:21:54 +0800</pubDate><author><name>dre4merp</name><uri>https://github.com/dre4merp</uri><email>dre4merp@gmail.com</email></author><guid>http://dre4merp.github.io/2021/12/kerberos-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid><description><![CDATA[<h2 id="基本知识" class="headerLink">
     <a href="#%e5%9f%ba%e6%9c%ac%e7%9f%a5%e8%af%86" class="header-mark"></a>基本知识</h2><h3 id="kerberos基本概念" class="headerLink">
     <a href="#kerberos%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" class="header-mark"></a>Kerberos基本概念</h3><p>Kerberos是一种第三方认证协议，通过使用对称加密技术为客户端/服务器应用程序提供强身份验证。在希腊神话中Kerberos是守护地狱之门的一条三头神犬，而这三个头分别代表着协议的三个角色，如下图所示它们分别是：</p>
-<p><img class="tw-inline" loading="lazy" src=https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/KDC架构.png   alt="KDC架构"  ></p>]]></description></item></channel></rss>
+<p><figure><a class="lightgallery" href="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/KDC%e6%9e%b6%e6%9e%84.png" title="KDC架构" data-thumbnail="https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/KDC架构.png" data-sub-html="<h2>KDC架构.png</h2><p>KDC架构</p>]]></description></item></channel></rss>

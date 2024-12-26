@@ -310,7 +310,7 @@ public class TestController {
 
 结果
 
-![20220402164705](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402164705.png)
+![20220402164705](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402164705.png "20220402164705.png")
 
 ## 漏洞分析
 
@@ -320,31 +320,31 @@ Spring4Shell 的漏洞点就在对参数进行赋值的过程中
 
 在`org.springframework.beans.AbstractPropertyAccessor#setPropertyValues(org.springframework.beans.PropertyValues, boolean, boolean)`这个函数中获取用户输入的参数并对 bean 对象进行赋值
 
-![20220402170650](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402170650.png)
+![20220402170650](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402170650.png "20220402170650.png")
 
 在赋值的过程中需要获取到对应的参数对象的参数描述符，其中的`getCachedIntrospectionResults().getPropertyDescriptor(propertyName)`函数便是通过名字在前文提到的缓存中获取参数描述符
 
-![20220402171358](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402171358.png)
+![20220402171358](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402171358.png "20220402171358.png")
 
-![20220402172103](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402172103.png)
+![20220402172103](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402172103.png "20220402172103.png")
 
 如上图，取到了缓存的`top.dre4merp.User`的属性描述符，其中包含了三个属性，其中的`name`和`age`没有任何问题，但是其中的`class`并不是我们设置的
 
 查看一下`class`的具体属性值，可以看出其是一个指向`top.dre4merp.User`的`java.lang.Class`, 通过这个属性描述符可以进行反射调用。那这个`class`是从哪里来的呢，这就需要我们回到第一次缓存的时候查看。
 
-![20220402173407](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402173407.png)
+![20220402173407](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402173407.png "20220402173407.png")
 
 下图中，红框以下的部分之前已经分析过，包括`forClass`。红框中的部分就是 spring 调用 java 本身的内省，也就是`IntroSpector`获得 BeanInfo
 
-![20220402175047](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402175047.png)
+![20220402175047](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402175047.png "20220402175047.png")
 
 上图中出现了递归调用是因为`IntroSpector`会获取父类的 BeanInfo
 
-![20220402175742](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402175742.png)
+![20220402175742](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220402175742.png "20220402175742.png")
 
 之后在获得子类的 BeanInfo 时，会先将父类的`PropertyDescriptor`添加到子类的`PropertyDescriptors`中，所以理论上所有继承自`Object`的类都会获得`class`属性
 
-![20220406152822](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406152822.png)
+![20220406152822](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406152822.png "20220406152822.png")
 
 ### 利用分析
 
@@ -368,11 +368,11 @@ class.module.classLoader.resources.context.parent.pipeline.first.pattern=
 
 在`org.springframework.beans#getPropertyAccessorForPropertyPath(String)`中递归寻找对应的属性访问器
 
-![20220406160956](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406160956.png)
+![20220406160956](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406160956.png "20220406160956.png")
 
 最后在`org.springframework.beans#setPropertyValue(PropertyValue)`中设置由用户控制的值
 
-![20220406160123](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406160123.png)
+![20220406160123](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406160123.png "20220406160123.png")
 
 ### 利用条件
 
@@ -383,7 +383,7 @@ class.module.classLoader.resources.context.parent.pipeline.first.pattern=
 * jdk 版本 >= 9
   * 如下图，当初 Spring 修复了 CVE-2010-1622，修复方式是拦截 `Class.getClassLoader` 的访问。但是 Java9 新增了可以通过`Class.getModule`方法。通过`getModule`的结果可以调用`getClassloader`的方式继续访问更多对象的属性。
 
-![20220406163847](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406163847.png)
+![20220406163847](https://raw.githubusercontent.com/dre4merp/Drawing-bed/main/images/20220406163847.png "20220406163847.png")
 
 ## 漏洞防护
 
